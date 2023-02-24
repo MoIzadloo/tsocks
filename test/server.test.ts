@@ -193,7 +193,7 @@ describe('server check hooks (userReq | useIdent)', () => {
 
   test('useReq connect', (done) => {
     const client = net.connect(serverPort, '127.0.0.1')
-    server.useReq('connect', (info, socket) => {
+    server.useReq('connect', (info) => {
       expect(info).toEqual({
         version: 0x04,
         address: google,
