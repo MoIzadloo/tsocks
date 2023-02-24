@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 92.77 142.95">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #cfdff2;
+      }
+
+      .cls-3 {
+        fill: #fff;
+        font-family: Trebuchet-BoldItalic, 'Trebuchet MS';
+        font-size: 13.57px;
+        font-style: italic;
+        font-weight: 700;
+      }
+
+      .cls-2 {
+        stroke: #fff;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-4 {
+        fill: #7ebad8;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="cls-4" d="m81.27,84.97l-10.84-6.26c-8.84-5.1-11.87-16.4-6.76-25.24l6.26-10.84c6.35-11,1.61-20.1-9.39-26.45h0c-11-6.35-24.09-7.55-30.44,3.45L3.09,66.39h0c-6.35,11-2.58,25.07,8.42,31.42h0s46.77,27,46.77,27c11,6.35,25.07,2.58,31.42-8.42h0c6.35-11,2.58-25.07-8.42-31.42Z"/>
+    <path class="cls-1" d="m5.81,61.66l-2.73,4.73h0c-6.35,11-2.58,25.07,8.42,31.42h0s5.03,2.9,5.03,2.9c1.65-7.97,2.93-14.66.94-21.89-1.59-5.79-7.67-12.59-11.66-17.16Z"/>
+    <path class="cls-1" d="m85.65,88.24c7.51,7.15,9.46,18.77,4.04,28.15h0c-5.44,9.41-16.52,13.53-26.5,10.54,1.19-5.3,3.46-12.71,8.05-20.71,4.79-8.35,10.31-14.24,14.41-17.98Z"/>
+    <rect class="cls-2" x="25.75" y="14.29" width="58.72" height="16.09" transform="translate(18.55 -24.56) rotate(30)"/>
+    <g>
+      <circle class="cls-1" cx="67.32" cy="89.52" r="2.49"/>
+      <circle class="cls-1" cx="40.98" cy="53.39" r="2.49"/>
+      <circle class="cls-1" cx="22.53" cy="56.15" r="2.49"/>
+      <circle class="cls-1" cx="52.17" cy="91.32" r="2.49"/>
+      <circle class="cls-1" cx="49.54" cy="110.36" r="2.49"/>
+      <circle class="cls-1" cx="30.59" cy="37.21" r="2.49"/>
+      <circle class="cls-1" cx="28.95" cy="95.6" r="2.49"/>
+      <circle class="cls-1" cx="44.22" cy="74.05" r="2.49"/>
+      <circle class="cls-1" cx="28.28" cy="75.39" r="2.49"/>
+    </g>
+  </g>
+  <text class="cls-3" transform="translate(29.71 13.48) rotate(30) scale(.79 1)"><tspan x="0" y="0">TS</tspan></text>
+  <text class="cls-3" transform="translate(40.65 19.8) rotate(30) scale(.79 1)"><tspan x="0" y="0">TS</tspan></text>
+  <text class="cls-3" transform="translate(51.6 26.11) rotate(30) scale(.79 1)"><tspan x="0" y="0">TS</tspan></text>
+  <text class="cls-3" transform="translate(62.54 32.43) rotate(30) scale(.79 1)"><tspan x="0" y="0">TS</tspan></text>
+</svg>
