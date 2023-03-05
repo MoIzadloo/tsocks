@@ -1,9 +1,16 @@
 import { createServer } from './server/server'
-import { userPass, none } from './auth/methods'
+import { connect } from './client/client'
+import * as serverMethods from './server/auth/methods'
+import * as clientMethods from './client/auth/methods'
 
-const authMethods = {
-  userPass,
-  none,
+const serverAuthMethods = {
+  userPass: serverMethods.userPass,
+  none: serverMethods.none,
 }
 
-export { createServer, authMethods }
+const clinetAuthmethods = {
+  userPass: clientMethods.userPass,
+  none: clientMethods.none,
+}
+
+export { createServer, connect, serverAuthMethods, clinetAuthmethods }

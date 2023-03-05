@@ -1,11 +1,11 @@
 import * as net from 'net'
-import { State } from './state/socks4'
-import { Readable } from '../helper/readable'
-import { IdentifierState } from './state/socks5'
-import Writable from '../helper/writable'
-import { Handlers } from './handlers/handlers'
-import Address from '../helper/address'
-import Event from '../helper/event'
+import { State } from '../helper/state'
+import { Readable } from './readable'
+import { IdentifierState } from '../server/state/socks5'
+import Writable from './writable'
+import { Handlers } from './handlers'
+import Address from './address'
+import Event from './event'
 
 export type EventTypes = {
   data: (data: Buffer) => void
@@ -96,7 +96,6 @@ class Connection {
     socket.on('close', () => {
       this.event.trigger('close', this)
     })
-    this.transitionTo(new IdentifierState(this))
   }
 
   /**

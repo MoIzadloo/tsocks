@@ -1,6 +1,6 @@
 import { createServer } from '../src'
 import Address from '../src/helper/address'
-import { userPass } from '../src/auth/methods'
+import { userPass } from '../src/server/auth/methods'
 import { SOCKSVERSIONS, COMMANDS } from '../src/helper/constants'
 import net from 'net'
 

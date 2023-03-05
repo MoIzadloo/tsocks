@@ -16,7 +16,17 @@ class Address {
   public type: string
   public port: number
 
-  constructor(port: number, host: string, type: string) {
+  constructor(port: number, host: string, type?: string) {
+    /**
+     * Regular expression for ipv4
+     */
+    const ipv4Regex =
+      '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
+    /**
+     * Regular expression for ipv6
+     */
+    const ipv6Regex =
+      '(?!^(?:(?:.*(?:::.*::|:::).*)|::|[0:]+[01]|.*[^:]:|[0-9a-fA-F](?:.*:.*){8}[0-9a-fA-F]|(?:[0-9a-fA-F]:){1,6}[0-9a-fA-F])$)^(?:(::|[0-9a-fA-F]{1,4}:{1,2})([0-9a-fA-F]{1,4}:{1,2}){0,6}([0-9a-fA-F]{1,4}|::)?)$'
     /**
      * Port
      */
@@ -30,7 +40,17 @@ class Address {
     /**
      * Type (ipv4 | ipv6 | domain)
      */
-    this.type = type.toLowerCase()
+    if (type) {
+      this.type = type.toLowerCase()
+    } else {
+      if (this.host.match(ipv4Regex)) {
+        this.type = 'ipv4'
+      } else if (this.host.match(ipv6Regex)) {
+        this.type = 'ipv6'
+      } else {
+        this.type = 'domain'
+      }
+    }
   }
 
   /**

@@ -1,4 +1,4 @@
-import { handler } from '../handler'
+import { handler } from '../../helper/handler'
 
 /**
  * Default implementation of connect

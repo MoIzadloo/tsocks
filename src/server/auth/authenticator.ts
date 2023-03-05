@@ -1,6 +1,6 @@
-import Connection from '../server/connection'
-import { Handlers } from '../server/handlers/handlers'
-import Writable from '../helper/writable'
+import Connection from '../../helper/connection'
+import { Handlers } from '../../helper/handlers'
+import Writable from '../../helper/writable'
 import { none } from './methods/none'
 
 /**

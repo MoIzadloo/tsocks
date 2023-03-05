@@ -1,8 +1,9 @@
 import * as net from 'net'
-import Connection, { EventTypes, Options } from './connection'
-import { Handler, handler as reqHandler } from './handlers/handler'
-import { Handlers } from './handlers/handlers'
-import { Method } from '../auth/methods/method'
+import Connection, { EventTypes, Options } from '../helper/connection'
+import { Handler, handler as reqHandler } from '../helper/handler'
+import { Handlers } from '../helper/handlers'
+import { AuthMethod } from '../helper/authMethod'
+import { connect, associate, bind } from './handlers'
 import Event from '../helper/event'
 
 type ConnectionListener = ((socket: net.Socket) => void) | undefined
@@ -34,7 +35,11 @@ export class Server {
 
   constructor(options?: Options, connectionListener?: ConnectionListener) {
     this.event = new Event<EventTypes>()
-    this.handlers = new Handlers()
+    this.handlers = new Handlers({
+      connect,
+      associate,
+      bind,
+    })
     this.event.subscribe('close', (conn) => {
       this.connections = this.connections.filter((item) => {
         return item !== conn
@@ -71,7 +76,7 @@ export class Server {
    * @param handler - Emitted when socks5 clients send an authentication request
    * @returns void
    */
-  public useAuth(handler: Method): void {
+  public useAuth(handler: AuthMethod): void {
     this.handlers.auth.push(handler)
   }
 

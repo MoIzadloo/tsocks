@@ -67,10 +67,10 @@ server.listen(port, host)
 There are two different authentication methods independent
 of which version of the socks protocol you are working with.
 in case you are using V5, you can use the useAuth hook and use
-one of the available methods from the [methods](./src/auth/methods)
+one of the available methods from the [methods](src/server/auth/methods)
 directory, or if you want to create your own implementations or
 custom methods, you have to define a function that implements the
-AuthMethod interface, like [userPass.ts](./src/auth/methods/userPass.ts) and pass it as an argument to useAuth hook, in case you are using V4 you have to use useIdent hook which receives a callback function which gives you userId, a string in which
+AuthMethod interface, like [userPass.ts](src/server/auth/methods/userPass.ts) and pass it as an argument to useAuth hook, in case you are using V4 you have to use useIdent hook which receives a callback function which gives you userId, a string in which
 should be processed and the result, which is going to be
 a boolean should be return from the callback function, in case you want to support
 both versions and also authenticate users on both you can use

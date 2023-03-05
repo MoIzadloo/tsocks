@@ -1,5 +1,5 @@
-import Address from '../../helper/address'
-import Connection from '../connection'
+import Address from './address'
+import Connection from './connection'
 import * as net from 'net'
 
 export interface Info {
