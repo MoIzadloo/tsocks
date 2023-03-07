@@ -38,10 +38,7 @@ describe('server socks5 (connect | associate | bind)', () => {
           ++state
           break
         default:
-          const google = new Address(
-            httpPort,
-            'google.com',
-          ).toBuffer()
+          const google = new Address(httpPort, 'google.com').toBuffer()
           client.write(
             Buffer.concat([
               Buffer.from([

@@ -76,6 +76,11 @@ class Connection {
     socks4: true,
   }
 
+  /**
+   * UserId for socks4 client
+   */
+  userId: string | undefined
+
   constructor(
     event: Event<EventTypes>,
     socket: net.Socket,

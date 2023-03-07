@@ -5,6 +5,7 @@ import * as net from 'net'
 export interface Info {
   version: number
   address: Address
+  userId?: string
 }
 
 export type Handler = (
@@ -27,6 +28,7 @@ export const handler =
         {
           version: connection.version,
           address: connection.address,
+          userId: connection.userId,
         },
         connection.socket,
         connection.resolve,

@@ -22,11 +22,6 @@ export class Client {
   private readonly port: number
 
   /**
-   * Triggers whenever the socket initialized
-   */
-  private readonly connectionListener: (() => void) | undefined
-
-  /**
    * The object which contains all default handlers
    */
   private readonly handlers: Handlers
@@ -36,11 +31,7 @@ export class Client {
    */
   private readonly event: Event<EventTypes>
 
-  constructor(
-    port: number,
-    host: string,
-    connectionListener: (() => void) | undefined
-  ) {
+  constructor(port: number, host: string) {
     this.host = host
     this.port = port
     this.handlers = new Handlers({
@@ -49,24 +40,28 @@ export class Client {
       bind: handlers.bind,
     })
     this.event = new Event<EventTypes>()
-    this.connectionListener = connectionListener
   }
 
   /**
    * Connect to the target host trough socks server
-   * @param port - Server port
-   * @param host - Server address
+   * @param port - Target port
+   * @param host - Target host address
    * @param version - Server protocol version
+   * @param userId - userId for identification in v4
    * @returns void
    */
-  connect(port: number, host: string, version: 4 | 5) {
+  connect(port: number, host: string, version: 4 | 5, userId?: string) {
     return new Promise<net.Socket>((resolve, reject) => {
-      const socket = net.connect(this.port, this.host, this.connectionListener)
+      const socket = net.connect(this.port, this.host)
       const connection = new Connection(this.event, socket, this.handlers)
       connection.version = version
       connection.address = new Address(port, host)
       connection.resolve = resolve
       connection.reject = reject
+      connection.userId = userId
+      connection.event.subscribeOnce('error', (err) => {
+        reject(err.message)
+      })
       if (version === 5) {
         const authenticator = new Authenticator(connection)
         authenticator.authenticate()
@@ -81,13 +76,8 @@ export class Client {
  * Open new connection and connect to server
  * @param port - Server port
  * @param host - Server address
- * @param connectionListener - Emitted when a new connection opens
  * @returns void
  */
-export const connect = (
-  port: number,
-  host: string,
-  connectionListener?: (() => void) | undefined
-) => {
-  return new Client(port, host, connectionListener)
+export const connect = (port: number, host: string) => {
+  return new Client(port, host)
 }

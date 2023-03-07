@@ -1,6 +1,13 @@
-import { ADDRESSTYPES, COMMANDS } from '../../helper/constants'
+import {
+  ADDRESSTYPES,
+  COMMANDS,
+  SOCKS4REPLY,
+  SOCKSVERSIONS,
+} from '../../helper/constants'
 import Address from '../../helper/address'
 import { State } from '../../helper/state'
+import Writable from '../../helper/writable'
+import writable from '../../helper/writable'
 
 /**
  * The RequestState class is responsible to handle
@@ -43,9 +50,6 @@ export class RequestState extends State {
       ADDRESSTYPES.ipv4
     )
     this.userId = this.context.readUntil(Buffer.from([0x00]))
-    if (!this.context.handlers.userId(this.userId.toString())) {
-      this.context.close()
-    }
   }
 
   /**
@@ -54,6 +58,20 @@ export class RequestState extends State {
    * @returns void
    */
   reply() {
+    if (
+      this.userId &&
+      this.context.address &&
+      !this.context.handlers.userId(this.userId.toString())
+    ) {
+      const writable = new Writable()
+      writable.push(
+        0x00,
+        SOCKS4REPLY.identFail.code,
+        this.context.address.toBuffer().port,
+        this.context.address.toBuffer().host
+      )
+      this.context.write(writable)
+    }
     this.context.socket.removeAllListeners('data')
     switch (this.cmd) {
       case COMMANDS.connect:

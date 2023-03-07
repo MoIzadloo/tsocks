@@ -1,7 +1,8 @@
-import { handler } from '../../helper/handler'
+import { handler, Info } from '../../helper/handler'
 import Writable from '../../helper/writable'
 import { Readable } from '../../helper/readable'
 import { COMMANDS, SOCKS4REPLY, SOCKS5REPLY } from '../../helper/constants'
+import net from 'net'
 
 /**
  * Handle connect request
@@ -32,10 +33,11 @@ export const connect = handler((info, socket, resolve, reject) => {
     }
   } else if (info.version === 4) {
     const addressBuff = info.address.toBuffer()
-    writeable.push(
-      COMMANDS.connect,
-      Buffer.concat([addressBuff.port, addressBuff.host, Buffer.from([0x00])])
-    )
+    writeable.push(COMMANDS.connect, addressBuff.port, addressBuff.host)
+    if (info.userId) {
+      writeable.push(Buffer.from(info.userId))
+    }
+    writeable.push(Buffer.from([0x00]))
   }
   socket.write(writeable.toBuffer())
   socket.on('data', (data) => {
