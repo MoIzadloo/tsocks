@@ -1,7 +1,7 @@
 import { handler } from '../../helper/handler'
 
 /**
- * Default implementation of connect
+ * Handle associate request
  * @returns void
  */
 export const associate = handler((info) => {

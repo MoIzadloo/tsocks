@@ -54,30 +54,84 @@ export const COMMANDS: Commands = Object.freeze({
   associate: 0x03,
 })
 
-interface Socks5reply {
-  succeeded: number
-  serveFailure: number
-  connRefused: number
+interface Reply {
+  code: number
+  msg: string
 }
+
+type Socks5ReplyName =
+  | 'succeeded'
+  | 'generalFailure'
+  | 'notAllowed'
+  | 'netUnreachable'
+  | 'hostUnreachable'
+  | 'connRefused'
+  | 'ttlExpired'
+  | 'cmdNotSupported'
+  | 'atypeNotSupported'
 
 /**
  * Socks5's specific available reply codes
  */
-export const SOCKS5REPLY: Socks5reply = Object.freeze({
-  succeeded: 0x00,
-  serveFailure: 0x01,
-  connRefused: 0x05,
+export const SOCKS5REPLY: Record<Socks5ReplyName, Reply> = Object.freeze({
+  succeeded: {
+    code: 0x00,
+    msg: 'Succeeded',
+  },
+  generalFailure: {
+    code: 0x01,
+    msg: 'General SOCKS server failure',
+  },
+  notAllowed: {
+    code: 0x02,
+    msg: 'Connection not allowed by ruleset',
+  },
+  netUnreachable: {
+    code: 0x03,
+    msg: 'Network unreachable',
+  },
+  hostUnreachable: {
+    code: 0x03,
+    msg: 'Host unreachable',
+  },
+  connRefused: {
+    code: 0x05,
+    msg: 'Connection refused',
+  },
+  ttlExpired: {
+    code: 0x06,
+    msg: 'TTL expired',
+  },
+  cmdNotSupported: {
+    code: 0x07,
+    msg: 'Command not supported',
+  },
+  atypeNotSupported: {
+    code: 0x08,
+    msg: 'Address type not supported',
+  },
 })
 
-interface Socks4reply {
-  succeeded: number
-  connRefused: number
-}
+type Socks4ReplyName = 'granted' | 'rejected' | 'identFail' | 'diffUserId'
 
 /**
- * Socks5'4 specific available reply codes
+ * Socks4's specific available reply codes
  */
-export const SOCKS4REPLY: Socks4reply = Object.freeze({
-  succeeded: 0x5a,
-  connRefused: 0x5b,
+export const SOCKS4REPLY: Record<Socks4ReplyName, Reply> = Object.freeze({
+  granted: {
+    code: 0x5a,
+    msg: 'Request granted',
+  },
+  rejected: {
+    code: 0x5b,
+    msg: 'Request rejected or failed',
+  },
+  identFail: {
+    code: 0x5c,
+    msg: 'request rejected because SOCKS server cannot connect to identity on the client',
+  },
+  diffUserId: {
+    code: 0x5d,
+    msg: 'request rejected because the client program and identity report different user-ids',
+  },
 })

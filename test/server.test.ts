@@ -41,7 +41,6 @@ describe('server socks5 (connect | associate | bind)', () => {
           const google = new Address(
             httpPort,
             'google.com',
-            'domain'
           ).toBuffer()
           client.write(
             Buffer.concat([
@@ -128,7 +127,7 @@ describe('server socks4 check (connect | associate | bind)', () => {
     const client = net.connect(serverPort, '127.0.0.1')
     const states = ['request', 'tunnel']
     let state = 0
-    const google = new Address(httpPort, '142.251.1.101', 'ipv4').toBuffer()
+    const google = new Address(httpPort, '142.251.1.101').toBuffer()
     client.write(
       Buffer.concat([
         Buffer.from([SOCKSVERSIONS.socks4, COMMANDS.connect]),
@@ -167,7 +166,7 @@ describe('server socks4 check (connect | associate | bind)', () => {
 describe('server check hooks (userReq | useIdent)', () => {
   const server = createServer()
   const id = 'tsocks:tsocks'
-  let google = new Address(httpPort, '142.251.1.101', 'ipv4')
+  let google = new Address(httpPort, '142.251.1.101')
   const connect = Buffer.concat([
     Buffer.from([SOCKSVERSIONS.socks4, COMMANDS.connect]),
     google.toBuffer().port,
@@ -211,7 +210,7 @@ describe('server check hooks (userReq | useIdent)', () => {
 
 describe('server check events (data)', () => {
   const server = createServer()
-  let google = new Address(httpPort, '142.251.1.101', 'ipv4')
+  let google = new Address(httpPort, '142.251.1.101')
   const connect = Buffer.concat([
     Buffer.from([SOCKSVERSIONS.socks4, COMMANDS.connect]),
     google.toBuffer().port,

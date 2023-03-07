@@ -1,7 +1,7 @@
 import { handler } from '../../helper/handler'
 
 /**
- * Default implementation of connect
+ * Handle bind request
  * @returns void
  */
 export const bind = handler((info) => {

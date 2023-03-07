@@ -7,7 +7,12 @@ export interface Info {
   address: Address
 }
 
-export type Handler = (info: Info, socket: net.Socket) => void
+export type Handler = (
+  info: Info,
+  socket: net.Socket,
+  resolve?: (value: net.Socket | PromiseLike<net.Socket>) => void,
+  reject?: (reason?: any) => void
+) => void
 
 /**
  * Inputs a callback function and return a function that accept connection and,
@@ -15,7 +20,7 @@ export type Handler = (info: Info, socket: net.Socket) => void
  * @returns function
  */
 export const handler =
-  (callback: (info: Info, socket: net.Socket) => void) =>
+  (callback: Handler) =>
   (connection: Connection): void => {
     if (connection.version && connection.address) {
       callback(
@@ -23,7 +28,9 @@ export const handler =
           version: connection.version,
           address: connection.address,
         },
-        connection.socket
+        connection.socket,
+        connection.resolve,
+        connection.reject
       )
     }
   }

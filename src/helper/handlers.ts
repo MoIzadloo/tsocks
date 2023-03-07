@@ -15,9 +15,13 @@ export class Handlers {
   public userId: (userId: string) => boolean
   public auth: AuthMethod[]
   public req: Req
-  constructor(req: Req) {
-    this.userId = () => true
-    this.auth = []
+  constructor(
+    req: Req,
+    auth: AuthMethod[] = [],
+    userId: (userId: string) => boolean = () => true,
+  ) {
     this.req = req
+    this.auth = auth
+    this.userId = userId
   }
 }

@@ -24,6 +24,16 @@ export type Options = {
  */
 class Connection {
   /**
+   * Resolve function for client only
+   */
+  public resolve?: (value: net.Socket | PromiseLike<net.Socket>) => void
+
+  /**
+   * Reject function for client only
+   */
+  public reject?: (reason?: any) => void
+
+  /**
    * Current state
    */
   private state: State = new IdentifierState(this)
