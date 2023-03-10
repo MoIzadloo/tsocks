@@ -1,7 +1,7 @@
 import { handler } from '../../helper/handler'
 
 /**
- * Handle associate request
+ * Handle udp associate request
  * @returns void
  */
 export const associate = handler((info) => {

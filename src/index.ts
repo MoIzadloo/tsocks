@@ -8,9 +8,9 @@ const serverAuthMethods = {
   none: serverMethods.none,
 }
 
-const clinetAuthmethods = {
+const clientAuthMethods = {
   userPass: clientMethods.userPass,
   none: clientMethods.none,
 }
 
-export { createServer, connect, serverAuthMethods, clinetAuthmethods }
+export { createServer, connect, serverAuthMethods, clientAuthMethods }

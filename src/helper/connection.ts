@@ -1,9 +1,10 @@
 import * as net from 'net'
-import { State } from '../helper/state'
+import { State } from './state'
 import { Readable } from './readable'
 import { IdentifierState } from '../server/state/socks5'
 import Writable from './writable'
 import { Handlers } from './handlers'
+import { Handler } from './handler'
 import Address from './address'
 import Event from './event'
 
@@ -77,9 +78,14 @@ class Connection {
   }
 
   /**
+   * Command(connect | bind | associate) handler for client
+   */
+  cmd?: number
+
+  /**
    * UserId for socks4 client
    */
-  userId: string | undefined
+  userId?: string
 
   constructor(
     event: Event<EventTypes>,

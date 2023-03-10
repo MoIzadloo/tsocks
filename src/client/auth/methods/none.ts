@@ -1,5 +1,6 @@
 import { AUTHMODES } from '../../../helper/constants'
 import { AuthMethod } from '../../../helper/authMethod'
+import { RequestState } from '../../state/socks5'
 
 /**
  * No authentication method
@@ -9,7 +10,9 @@ export const none = (): AuthMethod => {
   return {
     method: AUTHMODES.none,
     authenticate: (connection) => {
-      connection.handlers.req.connect(connection)
+      connection.transitionTo(new RequestState(connection))
+      connection.parse()
+      connection.reply()
     },
   }
 }

@@ -5,6 +5,8 @@ import * as handlers from './handlers/index'
 import { Handlers } from '../helper/handlers'
 import Authenticator from './auth/authenticator'
 import Address from '../helper/address'
+import { AuthMethod } from '../helper/authMethod'
+import { COMMANDS } from '../helper/constants'
 
 /**
  *  The Client class is responsible for creating a TCP socket connection,
@@ -31,9 +33,21 @@ export class Client {
    */
   private readonly event: Event<EventTypes>
 
-  constructor(port: number, host: string) {
+  /**
+   * Server protocol version
+   */
+  private readonly version: 4 | 5
+
+  /**
+   * userId for identification in v4
+   */
+  private readonly userId?: string
+
+  constructor(port: number, host: string, version: 4 | 5, userId?: string) {
     this.host = host
     this.port = port
+    this.userId = userId
+    this.version = version
     this.handlers = new Handlers({
       connect: handlers.connect,
       associate: handlers.associate,
@@ -50,25 +64,44 @@ export class Client {
    * @param userId - userId for identification in v4
    * @returns void
    */
-  connect(port: number, host: string, version: 4 | 5, userId?: string) {
+  connect(port: number, host: string, version?: 4 | 5, userId?: string) {
     return new Promise<net.Socket>((resolve, reject) => {
       const socket = net.connect(this.port, this.host)
       const connection = new Connection(this.event, socket, this.handlers)
-      connection.version = version
+      connection.cmd = COMMANDS.connect
+      if (version) {
+        connection.version = version
+      } else {
+        connection.version = this.version
+      }
       connection.address = new Address(port, host)
       connection.resolve = resolve
       connection.reject = reject
-      connection.userId = userId
+      if (userId) {
+        connection.userId = userId
+      } else {
+        connection.userId = this.userId
+      }
       connection.event.subscribeOnce('error', (err) => {
         reject(err.message)
       })
-      if (version === 5) {
+      if (connection.version === 5) {
         const authenticator = new Authenticator(connection)
         authenticator.authenticate()
-      } else if (version === 4) {
+      } else if (connection.version === 4) {
         connection.handlers.req.connect(connection)
       }
     })
+  }
+
+  /**
+   * Get the handler function, and push it into this.handlers.req
+   * @param handler - Emitted when the socks5 client sends an authentication request
+   * @returns Client
+   */
+  public useAuth(handler: AuthMethod): Client {
+    this.handlers.auth.push(handler)
+    return this
   }
 }
 
@@ -76,8 +109,15 @@ export class Client {
  * Open new connection and connect to server
  * @param port - Server port
  * @param host - Server address
+ * @param version - Server protocol version
+ * @param userId - userId for identification in v4
  * @returns void
  */
-export const connect = (port: number, host: string) => {
-  return new Client(port, host)
+export const connect = (
+  port: number,
+  host: string,
+  version: 4 | 5,
+  userId?: string
+) => {
+  return new Client(port, host, version, userId)
 }

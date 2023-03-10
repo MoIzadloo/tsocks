@@ -1,17 +1,16 @@
 import Connection from '../../helper/connection'
 import { Handlers } from '../../helper/handlers'
 import Writable from '../../helper/writable'
-import { none } from './methods/none'
+import { none } from './methods'
 import { SOCKSVERSIONS } from '../../helper/constants'
 import { MethodSelectionState } from '../state/socks5'
 
 /**
- * The Authenticator Class is responsible for resolving incoming
- * authentication requests specific for socks5
+ * The Authenticator Class is responsible for resolving the authentication process
  */
 class Authenticator {
   /**
-   * Server acceptable methods
+   * Client preferred methods
    */
   private readonly availableMethods: Handlers['auth']
 
@@ -29,7 +28,8 @@ class Authenticator {
   }
 
   /**
-   * Negotiates for authentication method with the user and authenticates users
+   * Negotiates for authentication method with the server and handle corresponding
+   * Authentication method
    * @returns void
    */
   public authenticate(): void {

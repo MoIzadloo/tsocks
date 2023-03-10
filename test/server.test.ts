@@ -1,6 +1,5 @@
-import { createServer } from '../src'
+import { createServer, serverAuthMethods } from '../src'
 import Address from '../src/helper/address'
-import { userPass } from '../src/server/auth/methods'
 import { SOCKSVERSIONS, COMMANDS } from '../src/helper/constants'
 import net from 'net'
 
@@ -70,7 +69,7 @@ describe('server check auth (useAuth)', () => {
   const password = 'tsocks'
 
   server.useAuth(
-    userPass((user, pass) => {
+    serverAuthMethods.userPass((user, pass) => {
       return user === username && pass === password
     })
   )
@@ -88,14 +87,14 @@ describe('server check auth (useAuth)', () => {
     client.on('data', (data) => {
       switch (states[state]) {
         case states[1]:
-          expect(data).toEqual(Buffer.from([SOCKSVERSIONS.socks5, 0x00]))
+          expect(data).toEqual(Buffer.from([0x01, 0x00]))
           client.destroy()
           done()
           break
         default:
           client.write(
             Buffer.concat([
-              Buffer.from([SOCKSVERSIONS.socks5, username.length]),
+              Buffer.from([0x01, username.length]),
               Buffer.from(username),
               Buffer.from([password.length]),
               Buffer.from(password),

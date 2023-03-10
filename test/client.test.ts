@@ -1,4 +1,9 @@
-import { createServer, connect } from '../src'
+import {
+  createServer,
+  connect,
+  clientAuthMethods,
+  serverAuthMethods,
+} from '../src'
 import { SOCKS5REPLY } from '../src/helper/constants'
 
 jest.setTimeout(20000)
@@ -14,8 +19,8 @@ describe('client socks5 (connect | associate | bind)', () => {
   })
 
   test('connect to google.com', (done) => {
-    connect(serverPort, serverHost)
-      .connect(httpPort, 'google.com', 5)
+    connect(serverPort, serverHost, 5)
+      .connect(httpPort, 'google.com')
       .then((socket) => {
         socket.write(
           Buffer.from(
@@ -25,8 +30,8 @@ describe('client socks5 (connect | associate | bind)', () => {
               '\r\n'
           )
         )
-        socket.on('data', async (data) => {
-          socket.removeAllListeners('data')
+        socket.once('data', (data) => {
+          socket.destroy()
           expect(data.toString()).toMatch(/20[01] OK/)
           done()
         })
@@ -38,13 +43,13 @@ describe('client socks5 (connect | associate | bind)', () => {
 
   test('connect to wrong domain', () => {
     return expect(
-      connect(serverPort, serverHost).connect(httpPort, 'dummy-url.c', 5)
+      connect(serverPort, serverHost, 5).connect(httpPort, 'dummy-url.c')
     ).rejects.toBe(SOCKS5REPLY.generalFailure.msg)
   })
 
-  test('wrong socks server address', async () => {
+  test('wrong socks server address', () => {
     return expect(
-      connect(22, serverHost).connect(httpPort, 'google.com', 5)
+      connect(22, serverHost, 5).connect(httpPort, 'google.com')
     ).rejects.toMatch(/ECONNREFUSED/)
   })
 
@@ -62,8 +67,8 @@ describe('client socks4 (connect | associate | bind)', () => {
   })
 
   test('connect to google.com', (done) => {
-    connect(serverPort, serverHost)
-      .connect(httpPort, '142.251.1.101', 4)
+    connect(serverPort, serverHost, 4)
+      .connect(httpPort, '142.251.1.101')
       .then((socket) => {
         socket.write(
           Buffer.from(
@@ -73,10 +78,10 @@ describe('client socks4 (connect | associate | bind)', () => {
               '\r\n'
           )
         )
-        socket.on('data', async (data) => {
+        socket.once('data', (data) => {
+          socket.destroy()
           expect(data.toString()).toMatch(/20[01] OK/)
           done()
-          socket.end()
         })
       })
       .catch((reason) => {
@@ -97,12 +102,17 @@ describe('client check authentication and identification', () => {
     server.useIdent((userId) => {
       return userId === 'tsocks'
     })
+    server.useAuth(
+      serverAuthMethods.userPass((user, pass) => {
+        return user == 'tsocks' && pass == 'tsocks'
+      })
+    )
     done()
   })
 
   test('socks4 identification', (done) => {
-    connect(serverPort, serverHost)
-      .connect(httpPort, '142.251.1.101', 4, 'tsocks')
+    connect(serverPort, serverHost, 4, 'tsocks')
+      .connect(httpPort, '142.251.1.101')
       .then((socket) => {
         socket.write(
           Buffer.from(
@@ -112,10 +122,34 @@ describe('client check authentication and identification', () => {
               '\r\n'
           )
         )
-        socket.on('data', async (data) => {
+        socket.once('data', (data) => {
+          socket.destroy()
           expect(data.toString()).toMatch(/20[01] OK/)
           done()
-          socket.end()
+        })
+      })
+      .catch((reason) => {
+        expect(true).toBe(false)
+      })
+  })
+
+  test('socks5 authentication', (done) => {
+    connect(serverPort, serverHost, 5)
+      .useAuth(clientAuthMethods.userPass('tsocks', 'tsocks'))
+      .connect(httpPort, '142.251.1.101')
+      .then((socket) => {
+        socket.write(
+          Buffer.from(
+            'GET / HTTP/1.1\r\n' +
+              'Host: www.google.com:80\r\n' +
+              'Connection: close\r\n' +
+              '\r\n'
+          )
+        )
+        socket.once('data', (data) => {
+          socket.destroy()
+          expect(data.toString()).toMatch(/20[01] OK/)
+          done()
         })
       })
       .catch((reason) => {
