@@ -83,8 +83,8 @@ both useAuth and useIdent together.
 
    const host = '127.0.0.1'
    const port = 1080
-   const username = 'tsocks'
-   const password = 'tsocks'
+   const username = 'user'
+   const password = 'pass'
 
    const server = createServer({
      socks4: false,
@@ -107,7 +107,7 @@ both useAuth and useIdent together.
 
    const host = '127.0.0.1'
    const port = 1080
-   const id = 'tsocks'
+   const id = 'user:pass'
 
    const server = createServer({
      socks4: true,
@@ -128,9 +128,9 @@ both useAuth and useIdent together.
 
    const host = '127.0.0.1'
    const port = 1080
-   const id = 'tsocks'
-   const username = 'tsocks'
-   const password = 'tsocks'
+   const id = 'user:pass'
+   const username = 'user'
+   const password = 'pass'
 
    const server = createServer({
      socks4: true,
@@ -226,7 +226,7 @@ you can easily implement it in a matter of seconds.
 
    const client = connect(port, host, 5)
 
-   socket1 = await client.connect(httpPort, 'google.com')
+   const socket1 = await client.connect(httpPort, 'google.com')
 
    socket1.write(
      Buffer.from(
@@ -241,7 +241,7 @@ you can easily implement it in a matter of seconds.
      console.log(data)
    })
 
-   socket2 = await client.connect(httpPort, 'google.com')
+   const socket2 = await client.connect(httpPort, 'google.com')
 
    socket2.write(
      Buffer.from(
@@ -269,17 +269,19 @@ AuthMethod interface, like [userPass.ts](src/client/auth/methods/userPass.ts) an
 in case you are using V4 you have to add your identification token
 as an argument (userId) to the request handler (connect | bind | associate).
 
-1. user/pass authentication socks5
+1. Authentication socks5
 
    ```typescript
    import { connect, clientAuthMethods } from 'tsocks'
 
    const host = '127.0.0.1'
    const port = 1080
+   const username = 'user'
+   const password = 'pass'
    const httpPort = 80
 
    const socket = await connect(port, host, 5)
-     .useAuth(clientAuthMethods.userPass('user', 'pass'))
+     .useAuth(clientAuthMethods.userPass(username, password))
      .connect(httpPort, 'google.com')
 
    socket.write(
@@ -303,9 +305,10 @@ as an argument (userId) to the request handler (connect | bind | associate).
 
    const host = '127.0.0.1'
    const port = 1080
+   const userId = 'user:pass'
    const httpPort = 80
 
-   const socket = await connect(port, host, 4, 'your userId').connect(
+   const socket = await connect(port, host, 4, userId).connect(
      httpPort,
      '142.251.1.101'
    )
