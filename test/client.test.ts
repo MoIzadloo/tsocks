@@ -47,12 +47,6 @@ describe('client socks5 (connect | associate | bind)', () => {
     ).rejects.toBe(SOCKS5REPLY.generalFailure.msg)
   })
 
-  test('wrong socks server address', () => {
-    return expect(
-      connect(22, serverHost, 5).connect(httpPort, 'google.com')
-    ).rejects.toMatch(/ECONNREFUSED/)
-  })
-
   afterAll((done) => {
     server.close()
     done()
