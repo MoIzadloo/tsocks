@@ -12,4 +12,4 @@
 ### Done ✓
 
 - [x] Implementation of server Connect
-- [x] Implementation of client (Connect)
+- [x] Implementation of client Connect
