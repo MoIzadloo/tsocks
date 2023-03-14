@@ -89,6 +89,9 @@ export class Client {
         const authenticator = new Authenticator(connection)
         authenticator.authenticate()
       } else if (connection.version === 4) {
+        if (connection.address.type === 'domain') {
+          reject('The Address type is not supported')
+        }
         connection.handlers.req.connect(connection)
       }
     })
