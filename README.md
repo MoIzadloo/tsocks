@@ -50,7 +50,7 @@ const server = createServer({
 
 // For development purposes
 server.on('data', (data) => {
-  // Log incoming requests
+  // Log incoming data
   console.log(data)
 })
 
@@ -210,7 +210,7 @@ you can easily implement it in a matter of seconds.
      )
    )
 
-   socket.once('data', (data) => {
+   socket.on('data', (data) => {
      console.log(data)
    })
    ```
@@ -237,7 +237,7 @@ you can easily implement it in a matter of seconds.
      )
    )
 
-   socket1.once('data', (data) => {
+   socket1.on('data', (data) => {
      console.log(data)
    })
 
@@ -252,7 +252,7 @@ you can easily implement it in a matter of seconds.
      )
    )
 
-   socket2.once('data', (data) => {
+   socket2.on('data', (data) => {
      console.log(data)
    })
    ```
@@ -293,7 +293,7 @@ as an argument (userId) to the request handler (connect | bind | associate).
      )
    )
 
-   socket.once('data', (data) => {
+   socket.on('data', (data) => {
      console.log(data)
    })
    ```
@@ -322,7 +322,7 @@ as an argument (userId) to the request handler (connect | bind | associate).
      )
    )
 
-   socket.once('data', (data) => {
+   socket.on('data', (data) => {
      console.log(data)
    })
    ```

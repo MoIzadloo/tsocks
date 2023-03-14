@@ -49,6 +49,9 @@ class UserPassReqState extends State {
    */
   reply(): void {
     if (this.status !== 0x00) {
+      if (this.context.reject) {
+        this.context.reject('Wrong credentials supplied')
+      }
       this.context.close()
     } else {
       this.context.transitionTo(new RequestState(this.context))

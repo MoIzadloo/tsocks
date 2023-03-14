@@ -30,13 +30,17 @@ export class MethodSelectionState extends State {
    * @returns void
    */
   reply(): void {
-    this.context.handlers.auth
-      .find((method) => {
-        if (this.method && method) {
-          return method.method === this.method.readInt8()
-        }
-      })
-      ?.authenticate(this.context)
+    if (this.method?.readInt8() === -1 && this.context.reject) {
+      this.context.reject('Authentication methods are not acceptable')
+    } else {
+      this.context.handlers.auth
+        .find((method) => {
+          if (this.method && method) {
+            return method.method === this.method.readInt8()
+          }
+        })
+        ?.authenticate(this.context)
+    }
   }
 }
 
