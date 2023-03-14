@@ -1,18 +1,18 @@
-import { AUTHMODES } from '../../helper/constants'
-import { Method } from './method'
-import Connection from '../../server/connection'
-import { State } from '../../server/state/socks4'
-import { RequestState } from '../../server/state/socks5'
+import { AUTHMODES } from '../../../helper/constants'
+import { AuthMethod } from '../../../helper/authMethod'
+import Connection from '../../../helper/connection'
+import { State } from '../../../helper/state'
+import { RequestState } from '../../state/socks5'
 
 /**
  * Extract user/pass from user authentication request and,
  * execute the handler function
  * @param handler - Check the authorization of user/pass
- * @returns Method
+ * @returns AuthMethod
  */
 export const userPass = (
   handler: (user: string, pass: string) => boolean
-): Method => {
+): AuthMethod => {
   return {
     method: AUTHMODES.userPass,
     authenticate: (connection: Connection) => {

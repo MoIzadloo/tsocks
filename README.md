@@ -50,7 +50,7 @@ const server = createServer({
 
 // For development purposes
 server.on('data', (data) => {
-  // Log incoming requests
+  // Log incoming data
   console.log(data)
 })
 
@@ -67,10 +67,10 @@ server.listen(port, host)
 There are two different authentication methods independent
 of which version of the socks protocol you are working with.
 in case you are using V5, you can use the useAuth hook and use
-one of the available methods from the [methods](./src/auth/methods)
+one of the available methods from the [methods'](src/server/auth/methods)
 directory, or if you want to create your own implementations or
 custom methods, you have to define a function that implements the
-AuthMethod interface, like [userPass.ts](./src/auth/methods/userPass.ts) and pass it as an argument to useAuth hook, in case you are using V4 you have to use useIdent hook which receives a callback function which gives you userId, a string in which
+AuthMethod interface, like [userPass.ts](src/server/auth/methods/userPass.ts) and pass it as an argument to useAuth hook, in case you are using V4 you have to use useIdent hook which receives a callback function which gives you userId, a string in which
 should be processed and the result, which is going to be
 a boolean should be return from the callback function, in case you want to support
 both versions and also authenticate users on both you can use
@@ -79,12 +79,12 @@ both useAuth and useIdent together.
 1. Server socks5
 
    ```typescript
-   import { createServer, authMethods } from 'tsocks'
+   import { createServer, serverAuthMethods } from 'tsocks'
 
    const host = '127.0.0.1'
    const port = 1080
-   const username = 'tsocks'
-   const password = 'tsocks'
+   const username = 'user'
+   const password = 'pass'
 
    const server = createServer({
      socks4: false,
@@ -92,7 +92,7 @@ both useAuth and useIdent together.
    })
 
    server.useAuth(
-     authMethods.userPass((user, pass) => {
+     serverAuthMethods.userPass((user, pass) => {
        return user === username && pass === password
      })
    )
@@ -107,7 +107,7 @@ both useAuth and useIdent together.
 
    const host = '127.0.0.1'
    const port = 1080
-   const id = 'tsocks'
+   const id = 'user:pass'
 
    const server = createServer({
      socks4: true,
@@ -124,13 +124,13 @@ both useAuth and useIdent together.
 3. Server socks4 and socks 5
 
    ```typescript
-   import { createServer, authMethods } from 'tsocks'
+   import { createServer, serverAuthMethods } from 'tsocks'
 
    const host = '127.0.0.1'
    const port = 1080
-   const id = 'tsocks'
-   const username = 'tsocks'
-   const password = 'tsocks'
+   const id = 'user:pass'
+   const username = 'user'
+   const password = 'pass'
 
    const server = createServer({
      socks4: true,
@@ -139,7 +139,7 @@ both useAuth and useIdent together.
 
    // useAuth for socks5 requests
    server.useAuth(
-     authMethods.userPass((user, pass) => {
+     serverAuthMethods.userPass((user, pass) => {
        // You can use an array or database query instead
        return user === username && pass === password
      })
@@ -184,6 +184,148 @@ server.useReq('connect', (info, socket) => {
 
 server.listen(port, host)
 ```
+
+### Proxy Client
+
+No matter which version of the proxy server you want to interact with V4 or V5
+you can easily implement it in a matter of seconds.
+
+1. Single connection
+
+   ```typescript
+   import { connect } from 'tsocks'
+
+   const host = '127.0.0.1'
+   const port = 1080
+   const httpPort = 80
+
+   const socket = await connect(port, host, 5).connect(httpPort, 'google.com')
+
+   socket.write(
+     Buffer.from(
+       'GET / HTTP/1.1\r\n' +
+         'Host: www.google.com:80\r\n' +
+         'Connection: close\r\n' +
+         '\r\n'
+     )
+   )
+
+   socket.on('data', (data) => {
+     console.log(data)
+   })
+   ```
+
+2. Multiple connections
+
+   ```typescript
+   import { connect } from 'tsocks'
+
+   const host = '127.0.0.1'
+   const port = 1080
+   const httpPort = 80
+
+   const client = connect(port, host, 5)
+
+   const socket1 = await client.connect(httpPort, 'google.com')
+
+   socket1.write(
+     Buffer.from(
+       'GET / HTTP/1.1\r\n' +
+         'Host: www.google.com:80\r\n' +
+         'Connection: close\r\n' +
+         '\r\n'
+     )
+   )
+
+   socket1.on('data', (data) => {
+     console.log(data)
+   })
+
+   const socket2 = await client.connect(httpPort, 'google.com')
+
+   socket2.write(
+     Buffer.from(
+       'GET / HTTP/1.1\r\n' +
+         'Host: www.google.com:80\r\n' +
+         'Connection: close\r\n' +
+         '\r\n'
+     )
+   )
+
+   socket2.on('data', (data) => {
+     console.log(data)
+   })
+   ```
+
+### Proxy client with authentication
+
+There are two different authentication methods independent
+of which version of the socks protocol you are working with.
+in case you are using V5, you can use the useAuth hook and use
+one of the available methods from the [methods'](src/client/auth/methods)
+directory, or if you want to create your own implementations or
+custom methods, you have to define a function that implements the
+AuthMethod interface, like [userPass.ts](src/client/auth/methods/userPass.ts) and pass it as an argument to useAuth hook,
+in case you are using V4 you have to add your identification token
+as an argument (userId) to the request handler (connect | bind | associate).
+
+1. Authentication socks5
+
+   ```typescript
+   import { connect, clientAuthMethods } from 'tsocks'
+
+   const host = '127.0.0.1'
+   const port = 1080
+   const username = 'user'
+   const password = 'pass'
+   const httpPort = 80
+
+   const socket = await connect(port, host, 5)
+     .useAuth(clientAuthMethods.userPass(username, password))
+     .connect(httpPort, 'google.com')
+
+   socket.write(
+     Buffer.from(
+       'GET / HTTP/1.1\r\n' +
+         'Host: www.google.com:80\r\n' +
+         'Connection: close\r\n' +
+         '\r\n'
+     )
+   )
+
+   socket.on('data', (data) => {
+     console.log(data)
+   })
+   ```
+
+2. Identification socks4
+
+   ```typescript
+   import { connect } from 'tsocks'
+
+   const host = '127.0.0.1'
+   const port = 1080
+   const userId = 'user:pass'
+   const httpPort = 80
+
+   const socket = await connect(port, host, 4, userId).connect(
+     httpPort,
+     '142.251.1.101'
+   )
+
+   socket.write(
+     Buffer.from(
+       'GET / HTTP/1.1\r\n' +
+         'Host: www.google.com:80\r\n' +
+         'Connection: close\r\n' +
+         '\r\n'
+     )
+   )
+
+   socket.on('data', (data) => {
+     console.log(data)
+   })
+   ```
 
 ## References
 

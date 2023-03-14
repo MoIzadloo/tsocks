@@ -1,8 +1,9 @@
 import * as net from 'net'
-import Connection, { EventTypes, Options } from './connection'
-import { Handler, handler as reqHandler } from './handlers/handler'
-import { Handlers } from './handlers/handlers'
-import { Method } from '../auth/methods/method'
+import Connection, { EventTypes, Options } from '../helper/connection'
+import { Handler, handler as reqHandler } from '../helper/handler'
+import { Handlers } from '../helper/handlers'
+import { AuthMethod } from '../helper/authMethod'
+import { connect, associate, bind } from './handlers'
 import Event from '../helper/event'
 
 type ConnectionListener = ((socket: net.Socket) => void) | undefined
@@ -34,7 +35,11 @@ export class Server {
 
   constructor(options?: Options, connectionListener?: ConnectionListener) {
     this.event = new Event<EventTypes>()
-    this.handlers = new Handlers()
+    this.handlers = new Handlers({
+      connect,
+      associate,
+      bind,
+    })
     this.event.subscribe('close', (conn) => {
       this.connections = this.connections.filter((item) => {
         return item !== conn
@@ -60,38 +65,42 @@ export class Server {
    * Subscribe new event handler
    * @param event - event name
    * @param callback - Emitted event triggers
-   * @returns void
+   * @returns Server
    */
-  public on(event: never, callback: never): void {
+  public on(event: never, callback: never): Server {
     this.event.subscribe(event, callback)
+    return this
   }
 
   /**
    * Get the handler function, and push it into this.handlers.req
    * @param handler - Emitted when socks5 clients send an authentication request
-   * @returns void
+   * @returns Server
    */
-  public useAuth(handler: Method): void {
+  public useAuth(handler: AuthMethod): Server {
     this.handlers.auth.push(handler)
+    return this
   }
 
   /**
    * Get the handler function, and update this.handlers.req
    * @param cmd - Specify handler type (connect | associate | bind)
    * @param handler - Emitted when new request appears
-   * @returns void
+   * @returns Server
    */
-  public useReq(cmd: keyof Handlers['req'], handler: Handler) {
+  public useReq(cmd: keyof Handlers['req'], handler: Handler): Server {
     this.handlers.req[cmd] = reqHandler(handler)
+    return this
   }
 
   /**
    * Get the handler function, and update this.handlers.userId
    * @param handler - Emitted when new request appears specifically on socks4
-   * @returns void
+   * @returns Server
    */
-  public useIdent(handler: (userId: string) => boolean): void {
+  public useIdent(handler: (userId: string) => boolean): Server {
     this.handlers.userId = handler
+    return this
   }
 
   /**
@@ -99,14 +108,15 @@ export class Server {
    * @param port - Port to listen on
    * @param host - Host to listen on
    * @param listeningListener - Emitted when new connection appears
-   * @returns void
+   * @returns Server
    */
   public listen(
     port: number,
     host: string,
     listeningListener?: (() => void) | undefined
-  ) {
+  ): Server {
     this.socketServer.listen(port, host, listeningListener)
+    return this
   }
 
   /**

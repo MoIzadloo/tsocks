@@ -1,43 +1,13 @@
-import { ADDRESSTYPES, COMMANDS } from '../../helper/constants'
-import Connection from '../connection'
+import {
+  ADDRESSTYPES,
+  COMMANDS,
+  SOCKS4REPLY,
+  SOCKSVERSIONS,
+} from '../../helper/constants'
 import Address from '../../helper/address'
-
-/**
- * The State class is an abstract class that all other,
- * extended classes should implement its methods and properties
- * we implemented a design pattern called state design pattern here
- */
-export abstract class State {
-  /**
-   * Context
-   */
-  protected context: Connection
-
-  constructor(context: Connection) {
-    this.context = context
-  }
-
-  /**
-   * Change state from one to other
-   * @param state - The state to change to
-   * @returns void
-   */
-  public transitionTo(state: State): void {
-    this.context.transitionTo(state)
-  }
-
-  /**
-   * Parse request
-   * @returns void
-   */
-  public abstract parse(): void
-
-  /**
-   * Reply to the user with a proper response
-   * @returns void
-   */
-  public abstract reply(): void
-}
+import { State } from '../../helper/state'
+import Writable from '../../helper/writable'
+import writable from '../../helper/writable'
 
 /**
  * The RequestState class is responsible to handle
@@ -80,9 +50,6 @@ export class RequestState extends State {
       ADDRESSTYPES.ipv4
     )
     this.userId = this.context.readUntil(Buffer.from([0x00]))
-    if (!this.context.handlers.userId(this.userId.toString())) {
-      this.context.close()
-    }
   }
 
   /**
@@ -91,6 +58,20 @@ export class RequestState extends State {
    * @returns void
    */
   reply() {
+    if (
+      this.userId &&
+      this.context.address &&
+      !this.context.handlers.userId(this.userId.toString())
+    ) {
+      const writable = new Writable()
+      writable.push(
+        0x00,
+        SOCKS4REPLY.identFail.code,
+        this.context.address.toBuffer().port,
+        this.context.address.toBuffer().host
+      )
+      this.context.write(writable)
+    }
     this.context.socket.removeAllListeners('data')
     switch (this.cmd) {
       case COMMANDS.connect:

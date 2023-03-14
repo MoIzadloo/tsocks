@@ -16,7 +16,24 @@ class Address {
   public type: string
   public port: number
 
-  constructor(port: number, host: string, type: string) {
+  constructor(port: number, host: string) {
+    /**
+     * Regular expression for ipv4
+     */
+    const ipv4Regex =
+      '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
+
+    /**
+     * Regular expression for ipv6
+     */
+    const ipv6Regex =
+      '(?!^(?:(?:.*(?:::.*::|:::).*)|::|[0:]+[01]|.*[^:]:|[0-9a-fA-F](?:.*:.*){8}[0-9a-fA-F]|(?:[0-9a-fA-F]:){1,6}[0-9a-fA-F])$)^(?:(::|[0-9a-fA-F]{1,4}:{1,2})([0-9a-fA-F]{1,4}:{1,2}){0,6}([0-9a-fA-F]{1,4}|::)?)$'
+
+    /**
+     * Regular expression for domain
+     */
+    const domainRegex = '^[a-zA-Z0-9-\\_]+\\.[a-zA-Z]+?$'
+
     /**
      * Port
      */
@@ -30,7 +47,15 @@ class Address {
     /**
      * Type (ipv4 | ipv6 | domain)
      */
-    this.type = type.toLowerCase()
+    if (this.host.match(ipv4Regex)) {
+      this.type = 'ipv4'
+    } else if (this.host.match(ipv6Regex)) {
+      this.type = 'ipv6'
+    } else if (this.host.match(domainRegex)) {
+      this.type = 'domain'
+    } else {
+      throw new Error('Invalid host address type')
+    }
   }
 
   /**
@@ -46,16 +71,13 @@ class Address {
     type: number
   ): Address {
     let addr
-    let atype: 'ipv4' | 'ipv6' | 'domain'
     if (type === ADDRESSTYPES.ipv6 || type === ADDRESSTYPES.ipv4) {
       addr = ipaddr.fromByteArray(bufToArray(host))
-      atype = addr.kind()
       addr = addr.toString()
     } else {
       addr = host.toString()
-      atype = 'domain'
     }
-    return new Address(port.readInt16BE(), addr, atype)
+    return new Address(port.readInt16BE(), addr)
   }
 
   /**
