@@ -8,8 +8,8 @@
 ### In Progress
 
 - [ ] Implementation of server (Bind | Associate)
-- [ ] Implementation of client (Connect)
 
 ### Done ✓
 
 - [x] Implementation of server Connect
+- [x] Implementation of client (Connect)

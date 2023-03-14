@@ -8,7 +8,15 @@ class Writable extends Array {
    * @returns Buffer
    */
   public toBuffer(): Buffer {
-    return Buffer.from(this)
+    const buffers = []
+    for (const byte of this) {
+      if (byte instanceof Buffer) {
+        buffers.push(byte)
+      } else {
+        buffers.push(Buffer.from([byte]))
+      }
+    }
+    return Buffer.concat(buffers)
   }
 }
 

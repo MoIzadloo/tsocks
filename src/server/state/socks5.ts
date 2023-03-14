@@ -2,8 +2,8 @@ import Address from '../../helper/address'
 import { SOCKSVERSIONS, ADDRESSTYPES, COMMANDS } from '../../helper/constants'
 
 import * as socks4 from './socks4'
-import { State } from './socks4'
-import Authenticator from '../../auth/authenticator'
+import { State } from '../../helper/state'
+import Authenticator from '../auth/authenticator'
 
 /**
  * The IdentifierState class identifies the version of the

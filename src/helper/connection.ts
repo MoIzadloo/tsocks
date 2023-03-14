@@ -1,11 +1,12 @@
 import * as net from 'net'
-import { State } from './state/socks4'
-import { Readable } from '../helper/readable'
-import { IdentifierState } from './state/socks5'
-import Writable from '../helper/writable'
-import { Handlers } from './handlers/handlers'
-import Address from '../helper/address'
-import Event from '../helper/event'
+import { State } from './state'
+import { Readable } from './readable'
+import { IdentifierState } from '../server/state/socks5'
+import Writable from './writable'
+import { Handlers } from './handlers'
+import { Handler } from './handler'
+import Address from './address'
+import Event from './event'
 
 export type EventTypes = {
   data: (data: Buffer) => void
@@ -23,6 +24,16 @@ export type Options = {
  * a new instance get constructed pre each connection
  */
 class Connection {
+  /**
+   * Resolve function for client only
+   */
+  public resolve?: (value: net.Socket | PromiseLike<net.Socket>) => void
+
+  /**
+   * Reject function for client only
+   */
+  public reject?: (reason?: any) => void
+
   /**
    * Current state
    */
@@ -66,6 +77,16 @@ class Connection {
     socks4: true,
   }
 
+  /**
+   * Command(connect | bind | associate) handler for client
+   */
+  cmd?: number
+
+  /**
+   * UserId for socks4 client
+   */
+  userId?: string
+
   constructor(
     event: Event<EventTypes>,
     socket: net.Socket,
@@ -96,7 +117,6 @@ class Connection {
     socket.on('close', () => {
       this.event.trigger('close', this)
     })
-    this.transitionTo(new IdentifierState(this))
   }
 
   /**

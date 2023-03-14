@@ -1,6 +1,5 @@
-import { createServer } from '../src'
+import { createServer, serverAuthMethods } from '../src'
 import Address from '../src/helper/address'
-import { userPass } from '../src/auth/methods'
 import { SOCKSVERSIONS, COMMANDS } from '../src/helper/constants'
 import net from 'net'
 
@@ -38,11 +37,7 @@ describe('server socks5 (connect | associate | bind)', () => {
           ++state
           break
         default:
-          const google = new Address(
-            httpPort,
-            'google.com',
-            'domain'
-          ).toBuffer()
+          const google = new Address(httpPort, 'google.com').toBuffer()
           client.write(
             Buffer.concat([
               Buffer.from([
@@ -74,7 +69,7 @@ describe('server check auth (useAuth)', () => {
   const password = 'tsocks'
 
   server.useAuth(
-    userPass((user, pass) => {
+    serverAuthMethods.userPass((user, pass) => {
       return user === username && pass === password
     })
   )
@@ -92,14 +87,14 @@ describe('server check auth (useAuth)', () => {
     client.on('data', (data) => {
       switch (states[state]) {
         case states[1]:
-          expect(data).toEqual(Buffer.from([SOCKSVERSIONS.socks5, 0x00]))
+          expect(data).toEqual(Buffer.from([0x01, 0x00]))
           client.destroy()
           done()
           break
         default:
           client.write(
             Buffer.concat([
-              Buffer.from([SOCKSVERSIONS.socks5, username.length]),
+              Buffer.from([0x01, username.length]),
               Buffer.from(username),
               Buffer.from([password.length]),
               Buffer.from(password),
@@ -128,7 +123,7 @@ describe('server socks4 check (connect | associate | bind)', () => {
     const client = net.connect(serverPort, '127.0.0.1')
     const states = ['request', 'tunnel']
     let state = 0
-    const google = new Address(httpPort, '142.251.1.101', 'ipv4').toBuffer()
+    const google = new Address(httpPort, '142.251.1.101').toBuffer()
     client.write(
       Buffer.concat([
         Buffer.from([SOCKSVERSIONS.socks4, COMMANDS.connect]),
@@ -167,7 +162,7 @@ describe('server socks4 check (connect | associate | bind)', () => {
 describe('server check hooks (userReq | useIdent)', () => {
   const server = createServer()
   const id = 'tsocks:tsocks'
-  let google = new Address(httpPort, '142.251.1.101', 'ipv4')
+  let google = new Address(httpPort, '142.251.1.101')
   const connect = Buffer.concat([
     Buffer.from([SOCKSVERSIONS.socks4, COMMANDS.connect]),
     google.toBuffer().port,
@@ -211,7 +206,7 @@ describe('server check hooks (userReq | useIdent)', () => {
 
 describe('server check events (data)', () => {
   const server = createServer()
-  let google = new Address(httpPort, '142.251.1.101', 'ipv4')
+  let google = new Address(httpPort, '142.251.1.101')
   const connect = Buffer.concat([
     Buffer.from([SOCKSVERSIONS.socks4, COMMANDS.connect]),
     google.toBuffer().port,
