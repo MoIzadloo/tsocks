@@ -2,7 +2,7 @@
  * The Readable class turns a Buffer into a readable object,
  * so it could be read piece by pieces
  */
-export class Readable {
+class Readable {
   /**
    * Input Buffer
    */
@@ -13,12 +13,18 @@ export class Readable {
   }
 
   /**
-   * Read n bytes of data
+   * Read n bytes of data,
+   * reads all the data if no argument is passed
    * @param bytes - Number of bytes to be read from data
    * @returns Buffer
    */
-  public read(bytes: number): Buffer {
-    const slice = this.data.subarray(0, bytes)
+  public read(bytes?: number): Buffer {
+    let slice
+    if (bytes) {
+      slice = this.data.subarray(0, bytes)
+    } else {
+      slice = this.data.subarray(0, this.data.length)
+    }
     this.data = this.data.subarray(bytes, this.data.length)
     return slice
   }
@@ -35,3 +41,5 @@ export class Readable {
     return slice
   }
 }
+
+export default Readable

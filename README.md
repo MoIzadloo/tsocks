@@ -2,7 +2,7 @@
 
 # TSocks
 
-TSocks is an implementation of socks protocol.
+TSocks is an implementation of SOCKS protocol.
 It's designed to be very flexible and adhesive
 
 - **Modular** to be suited to your needs
@@ -65,7 +65,7 @@ server.listen(port, host)
 ### Proxy Server With Authentication
 
 There are two different authentication methods independent
-of which version of the socks protocol you are working with.
+of which version of the SOCKS protocol you are working with.
 in case you are using V5, you can use the useAuth hook and use
 one of the available methods from the [methods'](src/server/auth/methods)
 directory, or if you want to create your own implementations or
@@ -121,7 +121,7 @@ both useAuth and useIdent together.
    server.listen(port, host)
    ```
 
-3. Server socks4 and socks 5
+3. Server socks4 and SOCKS 5
 
    ```typescript
    import { createServer, serverAuthMethods } from 'tsocks'
@@ -154,13 +154,43 @@ both useAuth and useIdent together.
    server.listen(port, host)
    ```
 
-### Socks Adaptor
+### Associate (UDP Relay)
 
-You may want to use the socks protocol to handle incoming network traffic.
-so you can set up a socks server and with the help of
+The Associate command assists you to send UDP packets to a remote host through the proxy server.
+the relay will listen for packets on the same port number as the SOCKS server does, and it doesn't support fragmentation however,
+you could replace it with your own implementation with the help of
+the useReq hook
+
+```typescript
+import { createServer } from 'tsocks'
+
+const host = '127.0.0.1'
+const port = 1080
+
+const server = createServer({
+  socks4: true,
+  socks5: true,
+})
+
+server.useReq('associate', (info, socket) => {
+  const host = info.address.host
+  const port = info.address.port // Port number
+  const type = info.address.type // ipv4 | ipv6 | domain
+  const version = info.version // SOCKS version
+  // You can implement the rest how ever you want
+  // Just remember the response should be decided by version
+})
+
+server.listen(port, host)
+```
+
+### SOCKS Adaptor
+
+You may want to use the SOCKS protocol to handle incoming network traffic.
+so you can set up a SOCKS server and with the help of
 useReq hook you have access to the socket and request information
 which contains information like host address and port, therefore you can send traffic through a tunnel with any other protocol like WS or HTTP
-or whatever you want and then send the response back to the client through socks.
+or whatever you want and then send the response back to the client through SOCKS.
 
 ```typescript
 import { createServer } from 'tsocks'
@@ -177,7 +207,7 @@ server.useReq('connect', (info, socket) => {
   const host = info.address.host
   const port = info.address.port // Port number
   const type = info.address.type // ipv4 | ipv6 | domain
-  const version = info.version // Socks version
+  const version = info.version // SOCKS version
   // You can implement the rest how ever you want
   // Just remember the response should be decided by version
 })
@@ -260,7 +290,7 @@ you can easily implement it in a matter of seconds.
 ### Proxy client with authentication
 
 There are two different authentication methods independent
-of which version of the socks protocol you are working with.
+of which version of the SOCKS protocol you are working with.
 in case you are using V5, you can use the useAuth hook and use
 one of the available methods from the [methods'](src/client/auth/methods)
 directory, or if you want to create your own implementations or

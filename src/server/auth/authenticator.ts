@@ -1,7 +1,7 @@
 import Connection from '../../helper/connection'
 import { Handlers } from '../../helper/handlers'
 import Writable from '../../helper/writable'
-import { none } from './methods/none'
+import { none } from './methods'
 
 /**
  * The Authenticator Class is responsible for resolving incoming

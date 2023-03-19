@@ -1,13 +1,7 @@
-import {
-  ADDRESSTYPES,
-  COMMANDS,
-  SOCKS4REPLY,
-  SOCKSVERSIONS,
-} from '../../helper/constants'
+import { ADDRESSTYPES, COMMANDS, SOCKS4REPLY } from '../../helper/constants'
 import Address from '../../helper/address'
 import { State } from '../../helper/state'
 import Writable from '../../helper/writable'
-import writable from '../../helper/writable'
 
 /**
  * The RequestState class is responsible to handle
@@ -45,8 +39,8 @@ export class RequestState extends State {
     this.dstPort = this.context.read(2)
     this.dstAddr = this.context.read(4)
     this.context.address = Address.buffToAddrFactory(
-      this.dstAddr,
       this.dstPort,
+      this.dstAddr,
       ADDRESSTYPES.ipv4
     )
     this.userId = this.context.readUntil(Buffer.from([0x00]))

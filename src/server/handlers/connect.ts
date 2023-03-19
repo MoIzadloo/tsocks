@@ -1,6 +1,5 @@
 import { handler, Info } from '../../helper/handler'
 import net from 'net'
-import Address from '../../helper/address'
 import { SOCKS5REPLY, SOCKSVERSIONS, SOCKS4REPLY } from '../../helper/constants'
 
 /**

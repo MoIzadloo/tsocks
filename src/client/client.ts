@@ -14,12 +14,12 @@ import { COMMANDS } from '../helper/constants'
  */
 export class Client {
   /**
-   * Socks server host
+   * SOCKS server host
    */
   private readonly host: string
 
   /**
-   * Socks server port
+   * SOCKS server port
    */
   private readonly port: number
 

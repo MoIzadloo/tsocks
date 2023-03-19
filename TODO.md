@@ -7,9 +7,11 @@
 
 ### In Progress
 
-- [ ] Implementation of server (Bind | Associate)
+- [ ] Implementation of server Bind
+- [ ] Implementation of client (Bind | Associate)
 
 ### Done ✓
 
 - [x] Implementation of server Connect
-- [x] Implementation of client (Connect)
+- [x] Implementation of client Connect
+- [x] Implementation of server Associate

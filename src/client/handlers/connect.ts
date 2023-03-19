@@ -1,8 +1,7 @@
-import { handler, Info } from '../../helper/handler'
+import { handler } from '../../helper/handler'
 import Writable from '../../helper/writable'
-import { Readable } from '../../helper/readable'
+import Readable from '../../helper/readable'
 import { COMMANDS, SOCKS4REPLY, SOCKS5REPLY } from '../../helper/constants'
-import net from 'net'
 
 /**
  * Handle connect request

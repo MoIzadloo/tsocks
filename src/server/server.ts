@@ -137,7 +137,7 @@ export class Server {
 }
 
 /**
- * Creates a new Socks server
+ * Creates a new SOCKS server
  * @param options - Optional inputs
  * @param connectionListener - Connection Listener
  * @returns Server

@@ -1,4 +1,4 @@
-import { AUTHMODES, SOCKSVERSIONS } from '../../../helper/constants'
+import { AUTHMODES } from '../../../helper/constants'
 import { AuthMethod } from '../../../helper/authMethod'
 import Connection from '../../../helper/connection'
 import Writable from '../../../helper/writable'

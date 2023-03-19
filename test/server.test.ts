@@ -1,7 +1,10 @@
 import { createServer, serverAuthMethods } from '../src'
 import Address from '../src/helper/address'
-import { SOCKSVERSIONS, COMMANDS } from '../src/helper/constants'
+import UdpRelay from '../src/helper/udpRelay'
+import { SOCKSVERSIONS, COMMANDS, ADDRESSTYPES } from '../src/helper/constants'
+import Readable from '../src/helper/readable'
 import net from 'net'
+import * as dgram from 'dgram'
 
 jest.setTimeout(20000)
 const serverPort = 3369
@@ -9,8 +12,15 @@ const httpPort = 80
 
 describe('server socks5 (connect | associate | bind)', () => {
   const server = createServer()
+  const echoServerPort = 5467
+  const echoServer = dgram.createSocket('udp4')
+
   beforeAll((done) => {
     server.listen(serverPort, '127.0.0.1')
+    echoServer.on('message', (msg, rinfo) => {
+      echoServer.send(Buffer.from('Hi'), rinfo.port, rinfo.address)
+    })
+    echoServer.bind(echoServerPort)
     done()
   })
 
@@ -23,6 +33,7 @@ describe('server socks5 (connect | associate | bind)', () => {
       switch (states[state]) {
         case states[2]:
           expect(data.toString()).toMatch(/20[01] OK/)
+          client.destroy()
           done()
           break
         case states[1]:
@@ -49,6 +60,69 @@ describe('server socks5 (connect | associate | bind)', () => {
               ]),
               google.host,
               google.port,
+            ])
+          )
+          ++state
+          break
+      }
+    })
+  })
+
+  test('associate greeting server', (done) => {
+    const client = net.connect(serverPort, '127.0.0.1')
+    const states = ['identifier', 'request']
+    let state = 0
+    client.write(Buffer.from([SOCKSVERSIONS.socks5, 0x01, 0x00]))
+    client.on('data', (data) => {
+      switch (states[state]) {
+        case states[1]:
+          const readable = new Readable(data)
+          readable.read(3)
+          const atype = readable.read(1).readInt8()
+          let host
+          switch (atype) {
+            case ADDRESSTYPES.ipv4:
+              host = readable.read(4)
+              break
+            case ADDRESSTYPES.ipv6:
+              host = readable.read(16)
+              break
+            default:
+              host = readable.read(readable.read(1).readInt8())
+              break
+          }
+          const port = readable.read(2)
+          const relayAddr = Address.buffToAddrFactory(port, host, atype)
+          const udpSocket = dgram.createSocket('udp4')
+          udpSocket.on('message', (msg, rinfo) => {
+            const parsedMsg = UdpRelay.parseUdpFrame(msg)
+            expect(parsedMsg.data.toString()).toBe('Hi')
+            udpSocket.close()
+            echoServer.close()
+            done()
+          })
+          udpSocket.bind()
+          udpSocket.send(
+            UdpRelay.createUdpFrame(
+              new Address(echoServerPort, '127.0.0.1'),
+              Buffer.from('Hey')
+            ),
+            relayAddr.port,
+            relayAddr.host
+          )
+          break
+        default:
+          const address = new Address(0, '0.0.0.0').toBuffer()
+          client.write(
+            Buffer.concat([
+              Buffer.from([
+                SOCKSVERSIONS.socks5,
+                COMMANDS.associate,
+                0x00,
+                address.type,
+              ]),
+              address.host,
+              address.port,
             ])
           )
           ++state
@@ -136,6 +210,7 @@ describe('server socks4 check (connect | associate | bind)', () => {
       switch (states[state]) {
         case states[1]:
           expect(data.toString()).toMatch(/20[01] OK/)
+          client.destroy()
           done()
           break
         default:

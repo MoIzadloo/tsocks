@@ -1,10 +1,9 @@
 import * as net from 'net'
 import { State } from './state'
-import { Readable } from './readable'
+import Readable from './readable'
 import { IdentifierState } from '../server/state/socks5'
 import Writable from './writable'
 import { Handlers } from './handlers'
-import { Handler } from './handler'
 import Address from './address'
 import Event from './event'
 
@@ -50,7 +49,7 @@ class Connection {
   public readable: Readable = new Readable(Buffer.allocUnsafe(0))
 
   /**
-   * Socks version
+   * SOCKS version
    */
   public version?: number
 

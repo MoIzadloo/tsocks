@@ -122,8 +122,8 @@ export class RequestState extends State {
     }
     this.dstPort = this.context.read(2)
     this.context.address = Address.buffToAddrFactory(
-      this.dstAddr,
       this.dstPort,
+      this.dstAddr,
       this.atype
     )
   }
