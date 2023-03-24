@@ -27,7 +27,7 @@ class UdpRelay {
    */
   private udpRelay: dgram.Socket
 
-  private constructor(port: number, callback?: () => void) {
+  private constructor(port: number) {
     this.udpRelay = dgram.createSocket('udp4')
     this.udpRelay.on('message', (msg, crinfo) => {
       const parsedMsg = UdpRelay.parseUdpFrame(msg)
@@ -51,18 +51,17 @@ class UdpRelay {
         )
       }
     })
-    this.udpRelay.bind(port, callback)
+    this.udpRelay.bind(port)
   }
 
   /**
    * The static method that controls the access to the UdpRelay instance
    * @param port - Port to bind socket to
-   * @param callback - Callback for bind
    * @returns UdpRelay
    */
-  public static getInstance(port: number, callback?: () => void): UdpRelay {
+  public static getInstance(port: number): UdpRelay {
     if (!UdpRelay.instance) {
-      UdpRelay.instance = new UdpRelay(port, callback)
+      UdpRelay.instance = new UdpRelay(port)
     }
     return UdpRelay.instance
   }
@@ -125,6 +124,14 @@ class UdpRelay {
       address,
       data,
     }
+  }
+
+  /**
+   * Close Relay's socket
+   * @param callback - Called when the socket has been closed
+   */
+  close(callback?: () => void) {
+    this.udpRelay.close(callback)
   }
 }
 

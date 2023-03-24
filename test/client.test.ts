@@ -17,7 +17,7 @@ const httpPort = 80
 
 describe('client socks5 (connect | associate | bind)', () => {
   const server = createServer()
-  const fakeDnsPort = 2345
+  const fakeDnsPort = 3456
   const fakeDnsServer = dgram.createSocket('udp4')
   beforeAll((done) => {
     fakeDnsServer.bind(fakeDnsPort)
@@ -48,38 +48,38 @@ describe('client socks5 (connect | associate | bind)', () => {
       })
   })
 
-  // test('associate', (done) =>{
-  //   connect(serverPort, serverHost, 5)
-  //     .associate(0, '0.0.0.0')
-  //     .then(info => {
-  //       dns.setServers([`127.0.0.1:${fakeDnsPort}`])
-  //       dns.resolve('google.com', (err, addresses) => {
-  //         console.log(addresses)
-  //       })
-  //       fakeDnsServer.on('message', (msg, rinfo) => {
-  //         console.log(msg)
-  //         // udpSocket.send(
-  //         //   UdpRelay.createUdpFrame(
-  //         //     new Address(info.address.port, '127.0.0.1'),
-  //         //     Buffer.from('Hey')
-  //         //   ),
-  //         //   info.address.port,
-  //         //   info.address.host
-  //         // )
-  //       })
-  //       const udpSocket = dgram.createSocket('udp4')
-  //       udpSocket.on('message', (msg, rinfo) => {
-  //         const parsedMsg = UdpRelay.parseUdpFrame(msg)
-  //         console.log(parsedMsg)
-  //         udpSocket.close()
-  //         done()
-  //       })
-  //       udpSocket.bind()
-  //     })
-  //     .catch(reason => {
-  //       expect(true).toBe(false)
-  //     })
-  // })
+  test('associate', (done) =>{
+    connect(serverPort, serverHost, 5)
+      .associate(0, '0.0.0.0')
+      .then(info => {
+        const udpSocket = dgram.createSocket('udp4')
+        dns.setServers([`127.0.0.1:${fakeDnsPort}`])
+        dns.resolve('google.com', (err, addresses) => {
+          fakeDnsServer.close()
+          udpSocket.close()
+          done()
+        })
+        fakeDnsServer.on('message', (msg, rinfo) => {
+          udpSocket.send(
+            UdpRelay.createUdpFrame(
+              new Address(53, '8.8.8.8'),
+              Buffer.from(msg)
+            ),
+            info.address.port,
+            info.address.host
+          )
+          udpSocket.once('message', (msg) => {
+            const parsedMsg = UdpRelay.parseUdpFrame(msg)
+            fakeDnsServer.send(parsedMsg.data, rinfo.port, rinfo.address)
+          })
+        })
+        udpSocket.bind()
+      })
+      .catch(reason => {
+        console.log(reason)
+        expect(true).toBe(false)
+      })
+  })
 
   test('connect to wrong domain', () => {
     return expect(

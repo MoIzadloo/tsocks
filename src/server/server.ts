@@ -55,6 +55,7 @@ export class Server {
       this.connections.push(connection)
       connectionListener?.(socket)
     })
+    this.socketServer.on('close', () => this.event.trigger('terminate'))
   }
 
   public on(event: 'data', callback: EventTypes['data']): void

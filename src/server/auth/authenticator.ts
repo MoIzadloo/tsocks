@@ -2,6 +2,7 @@ import Connection from '../../helper/connection'
 import { Handlers } from '../../helper/handlers'
 import Writable from '../../helper/writable'
 import { none } from './methods'
+import {SOCKSVERSIONS} from "../../helper/constants";
 
 /**
  * The Authenticator Class is responsible for resolving incoming
@@ -53,11 +54,11 @@ class Authenticator {
       }
     }
     if (acceptable && selectedMethod) {
-      writable.push(this.connection?.request?.ver, selectedMethod.method)
+      writable.push(SOCKSVERSIONS.socks5, selectedMethod.method)
       this.connection.write(writable)
       selectedMethod.authenticate(this.connection)
     } else {
-      writable.push(this.connection?.request?.ver, 0xff)
+      writable.push(SOCKSVERSIONS.socks5, 0xff)
       this.connection.write(writable)
       this.connection.close()
     }

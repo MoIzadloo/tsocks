@@ -7,7 +7,7 @@ import Reply from '../../helper/reply'
  * Handle connect request
  * @returns void
  */
-export const connect = handler((info, socket, resolve, reject) => {
+export const connect = handler((info, socket, event, resolve, reject) => {
   const request = new Request(
     info.version,
     COMMANDS.connect,

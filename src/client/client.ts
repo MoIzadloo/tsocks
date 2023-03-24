@@ -61,6 +61,7 @@ export class Client {
   private connector(
     port: number,
     host: string,
+    cmd: number,
     resolve: (value: HandlerResolve | PromiseLike<HandlerResolve>) => void,
     reject: (arg0: string) => void,
     version?: 4 | 5,
@@ -68,7 +69,6 @@ export class Client {
   ) {
     const socket = net.connect(this.port, this.host)
     const connection = new Connection(this.event, socket, this.handlers)
-    const cmd = COMMANDS.connect
     let ver
     if (version) {
       ver = version
@@ -95,7 +95,14 @@ export class Client {
   associate(port: number, host: string, version?: 4 | 5) {
     return new Promise<HandlerResolve>((resolve, reject) => {
       if (version === 5 || (!version && this.version === 5)) {
-        const connection = this.connector(port, host, resolve, reject, 5)
+        const connection = this.connector(
+          port,
+          host,
+          COMMANDS.associate,
+          resolve,
+          reject,
+          5
+        )
         const authenticator = new Authenticator(connection)
         authenticator.authenticate()
       } else {
@@ -117,6 +124,7 @@ export class Client {
       const connection = this.connector(
         port,
         host,
+        COMMANDS.connect,
         resolve,
         reject,
         version,

@@ -13,6 +13,7 @@ export type EventTypes = {
   data: (data: Buffer) => void
   error: (err: Error) => void
   close: (connection: Connection) => void
+  terminate: () => void
 }
 
 export type Options = {
