@@ -54,9 +54,9 @@ export class RequestState extends State {
    * Select the handler function from handlers
    */
   parse(): void {
-    if (this.context.cmd) {
+    if (this.context?.request?.cmd) {
       this.context.socket.removeAllListeners('data')
-      switch (this.context.cmd) {
+      switch (this.context.request.cmd) {
         case COMMANDS.connect:
           this.handler = this.context.handlers.req.connect
           break

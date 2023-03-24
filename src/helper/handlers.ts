@@ -1,5 +1,6 @@
 import { AuthMethod } from './authMethod'
 import Connection from './connection'
+import net from 'net'
 
 interface Req {
   connect: (connection: Connection) => void

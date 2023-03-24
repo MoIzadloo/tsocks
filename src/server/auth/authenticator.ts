@@ -53,11 +53,11 @@ class Authenticator {
       }
     }
     if (acceptable && selectedMethod) {
-      writable.push(this.connection.version, selectedMethod.method)
+      writable.push(this.connection?.request?.ver, selectedMethod.method)
       this.connection.write(writable)
       selectedMethod.authenticate(this.connection)
     } else {
-      writable.push(this.connection.version, 0xff)
+      writable.push(this.connection?.request?.ver, 0xff)
       this.connection.write(writable)
       this.connection.close()
     }

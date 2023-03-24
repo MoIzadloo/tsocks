@@ -3,14 +3,16 @@ import Event from '../helper/event'
 import Connection, { EventTypes } from '../helper/connection'
 import * as handlers from './handlers/index'
 import { Handlers } from '../helper/handlers'
+import { HandlerResolve } from '../helper/handler'
 import Authenticator from './auth/authenticator'
 import Address from '../helper/address'
 import { AuthMethod } from '../helper/authMethod'
-import { COMMANDS } from '../helper/constants'
+import { COMMANDS, SOCKSVERSIONS } from '../helper/constants'
+import Request from '../helper/request'
 
 /**
  *  The Client class is responsible for creating a TCP socket connection,
- *  and communicate with a standard socks server
+ *  and communicate with a standard SOCKS server
  */
 export class Client {
   /**
@@ -56,8 +58,54 @@ export class Client {
     this.event = new Event<EventTypes>()
   }
 
+  private connector(
+    port: number,
+    host: string,
+    resolve: (value: HandlerResolve | PromiseLike<HandlerResolve>) => void,
+    reject: (arg0: string) => void,
+    version?: 4 | 5,
+    userId?: string
+  ) {
+    const socket = net.connect(this.port, this.host)
+    const connection = new Connection(this.event, socket, this.handlers)
+    const cmd = COMMANDS.connect
+    let ver
+    if (version) {
+      ver = version
+    } else {
+      ver = this.version
+    }
+    const address = new Address(port, host)
+    let id
+    if (userId) {
+      id = userId
+    } else {
+      id = this.userId
+    }
+    connection.request = new Request(ver, cmd, address)
+    connection.resolve = resolve
+    connection.reject = reject
+
+    connection.event.subscribeOnce('error', (err) => {
+      reject(err.message)
+    })
+    return connection
+  }
+
+  associate(port: number, host: string, version?: 4 | 5) {
+    return new Promise<HandlerResolve>((resolve, reject) => {
+      if (version === 5 || (!version && this.version === 5)) {
+        const connection = this.connector(port, host, resolve, reject, 5)
+        const authenticator = new Authenticator(connection)
+        authenticator.authenticate()
+      } else {
+        reject("SOCKS V4  doesn't support associate command")
+      }
+    })
+  }
+
   /**
-   * Connect to the target host trough socks server
+   * Connect to the target host trough SOCKS server
    * @param port - Target port
    * @param host - Target host address
    * @param version - Server protocol version
@@ -65,31 +113,20 @@ export class Client {
    * @returns void
    */
   connect(port: number, host: string, version?: 4 | 5, userId?: string) {
-    return new Promise<net.Socket>((resolve, reject) => {
-      const socket = net.connect(this.port, this.host)
-      const connection = new Connection(this.event, socket, this.handlers)
-      connection.cmd = COMMANDS.connect
-      if (version) {
-        connection.version = version
-      } else {
-        connection.version = this.version
-      }
-      connection.address = new Address(port, host)
-      connection.resolve = resolve
-      connection.reject = reject
-      if (userId) {
-        connection.userId = userId
-      } else {
-        connection.userId = this.userId
-      }
-      connection.event.subscribeOnce('error', (err) => {
-        reject(err.message)
-      })
-      if (connection.version === 5) {
+    return new Promise<HandlerResolve>((resolve, reject) => {
+      const connection = this.connector(
+        port,
+        host,
+        resolve,
+        reject,
+        version,
+        userId
+      )
+      if (connection?.request?.ver === 5) {
         const authenticator = new Authenticator(connection)
         authenticator.authenticate()
-      } else if (connection.version === 4) {
-        if (connection.address.type === 'domain') {
+      } else if (connection?.request?.ver === 4) {
+        if (connection?.request?.addr?.type === 'domain') {
           reject('The Address type is not supported')
         }
         connection.handlers.req.connect(connection)

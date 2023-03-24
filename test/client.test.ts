@@ -5,6 +5,10 @@ import {
   serverAuthMethods,
 } from '../src'
 import { SOCKS5REPLY } from '../src/helper/constants'
+import dgram from 'dgram'
+import UdpRelay from '../src/helper/udpRelay'
+import Address from '../src/helper/address'
+import * as dns from 'dns'
 
 jest.setTimeout(20000)
 const serverPort = 3369
@@ -13,7 +17,10 @@ const httpPort = 80
 
 describe('client socks5 (connect | associate | bind)', () => {
   const server = createServer()
+  const fakeDnsPort = 2345
+  const fakeDnsServer = dgram.createSocket('udp4')
   beforeAll((done) => {
+    fakeDnsServer.bind(fakeDnsPort)
     server.listen(serverPort, serverHost)
     done()
   })
@@ -21,8 +28,8 @@ describe('client socks5 (connect | associate | bind)', () => {
   test('connect to google.com', (done) => {
     connect(serverPort, serverHost, 5)
       .connect(httpPort, 'google.com')
-      .then((socket) => {
-        socket.write(
+      .then((info) => {
+        info.socket.write(
           Buffer.from(
             'GET / HTTP/1.1\r\n' +
               'Host: www.google.com:80\r\n' +
@@ -30,8 +37,8 @@ describe('client socks5 (connect | associate | bind)', () => {
               '\r\n'
           )
         )
-        socket.once('data', (data) => {
-          socket.destroy()
+        info.socket.once('data', (data) => {
+          info.socket.destroy()
           expect(data.toString()).toMatch(/20[01] OK/)
           done()
         })
@@ -40,6 +47,39 @@ describe('client socks5 (connect | associate | bind)', () => {
         expect(true).toBe(false)
       })
   })
+
+  // test('associate', (done) =>{
+  //   connect(serverPort, serverHost, 5)
+  //     .associate(0, '0.0.0.0')
+  //     .then(info => {
+  //       dns.setServers([`127.0.0.1:${fakeDnsPort}`])
+  //       dns.resolve('google.com', (err, addresses) => {
+  //         console.log(addresses)
+  //       })
+  //       fakeDnsServer.on('message', (msg, rinfo) => {
+  //         console.log(msg)
+  //         // udpSocket.send(
+  //         //   UdpRelay.createUdpFrame(
+  //         //     new Address(info.address.port, '127.0.0.1'),
+  //         //     Buffer.from('Hey')
+  //         //   ),
+  //         //   info.address.port,
+  //         //   info.address.host
+  //         // )
+  //       })
+  //       const udpSocket = dgram.createSocket('udp4')
+  //       udpSocket.on('message', (msg, rinfo) => {
+  //         const parsedMsg = UdpRelay.parseUdpFrame(msg)
+  //         console.log(parsedMsg)
+  //         udpSocket.close()
+  //         done()
+  //       })
+  //       udpSocket.bind()
+  //     })
+  //     .catch(reason => {
+  //       expect(true).toBe(false)
+  //     })
+  // })
 
   test('connect to wrong domain', () => {
     return expect(
@@ -63,8 +103,8 @@ describe('client socks4 (connect | associate | bind)', () => {
   test('connect to google.com', (done) => {
     connect(serverPort, serverHost, 4)
       .connect(httpPort, '142.251.1.101')
-      .then((socket) => {
-        socket.write(
+      .then((info) => {
+        info.socket.write(
           Buffer.from(
             'GET / HTTP/1.1\r\n' +
               'Host: www.google.com:80\r\n' +
@@ -72,8 +112,8 @@ describe('client socks4 (connect | associate | bind)', () => {
               '\r\n'
           )
         )
-        socket.once('data', (data) => {
-          socket.destroy()
+        info.socket.once('data', (data) => {
+          info.socket.destroy()
           expect(data.toString()).toMatch(/20[01] OK/)
           done()
         })
@@ -107,8 +147,8 @@ describe('client check authentication and identification', () => {
   test('socks4 identification', (done) => {
     connect(serverPort, serverHost, 4, 'tsocks')
       .connect(httpPort, '142.251.1.101')
-      .then((socket) => {
-        socket.write(
+      .then((info) => {
+        info.socket.write(
           Buffer.from(
             'GET / HTTP/1.1\r\n' +
               'Host: www.google.com:80\r\n' +
@@ -116,8 +156,8 @@ describe('client check authentication and identification', () => {
               '\r\n'
           )
         )
-        socket.once('data', (data) => {
-          socket.destroy()
+        info.socket.once('data', (data) => {
+          info.socket.destroy()
           expect(data.toString()).toMatch(/20[01] OK/)
           done()
         })
@@ -131,8 +171,8 @@ describe('client check authentication and identification', () => {
     connect(serverPort, serverHost, 5)
       .useAuth(clientAuthMethods.userPass('tsocks', 'tsocks'))
       .connect(httpPort, '142.251.1.101')
-      .then((socket) => {
-        socket.write(
+      .then((info) => {
+        info.socket.write(
           Buffer.from(
             'GET / HTTP/1.1\r\n' +
               'Host: www.google.com:80\r\n' +
@@ -140,8 +180,8 @@ describe('client check authentication and identification', () => {
               '\r\n'
           )
         )
-        socket.once('data', (data) => {
-          socket.destroy()
+        info.socket.once('data', (data) => {
+          info.socket.destroy()
           expect(data.toString()).toMatch(/20[01] OK/)
           done()
         })

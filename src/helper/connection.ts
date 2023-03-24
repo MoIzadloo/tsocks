@@ -4,8 +4,10 @@ import Readable from './readable'
 import { IdentifierState } from '../server/state/socks5'
 import Writable from './writable'
 import { Handlers } from './handlers'
+import { HandlerResolve } from './handler'
 import Address from './address'
 import Event from './event'
+import Request from './request'
 
 export type EventTypes = {
   data: (data: Buffer) => void
@@ -26,7 +28,7 @@ class Connection {
   /**
    * Resolve function for client only
    */
-  public resolve?: (value: net.Socket | PromiseLike<net.Socket>) => void
+  public resolve?: (value: PromiseLike<HandlerResolve> | HandlerResolve) => void
 
   /**
    * Reject function for client only
@@ -49,16 +51,6 @@ class Connection {
   public readable: Readable = new Readable(Buffer.allocUnsafe(0))
 
   /**
-   * SOCKS version
-   */
-  public version?: number
-
-  /**
-   * Address
-   */
-  public address?: Address
-
-  /**
    * Authentication and request handlers
    */
   public handlers: Handlers
@@ -77,14 +69,11 @@ class Connection {
   }
 
   /**
-   * Command(connect | bind | associate) handler for client
-   */
-  cmd?: number
-
-  /**
    * UserId for socks4 client
    */
   userId?: string
+
+  request?: Request
 
   constructor(
     event: Event<EventTypes>,
@@ -127,12 +116,16 @@ class Connection {
     this.socket.write(writable.toBuffer())
   }
 
+  public cat(bytes?: number): Buffer {
+    return this.readable.cat(bytes)
+  }
+
   /**
    * Read n bytes of data
    * @param bytes - Number of bytes to be read from data
    * @returns Buffer
    */
-  public read(bytes: number): Buffer {
+  public read(bytes?: number): Buffer {
     return this.readable.read(bytes)
   }
 

@@ -12,6 +12,16 @@ class Readable {
     this.data = data
   }
 
+  public cat(bytes?: number) {
+    let slice
+    if (bytes) {
+      slice = this.data.subarray(0, bytes)
+    } else {
+      slice = this.data.subarray(0, this.data.length)
+    }
+    return slice
+  }
+
   /**
    * Read n bytes of data,
    * reads all the data if no argument is passed
