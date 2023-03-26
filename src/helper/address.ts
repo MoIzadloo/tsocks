@@ -1,6 +1,5 @@
 import { ADDRESSTYPES } from './constants'
-import { bufToArray } from './util'
-import ipaddr from 'ipaddr.js'
+import * as ip from 'ip'
 
 interface BuffIp {
   port: Buffer
@@ -17,18 +16,6 @@ class Address {
   public port: number
 
   constructor(port: number, host: string) {
-    /**
-     * Regular expression for ipv4
-     */
-    const ipv4Regex =
-      '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
-
-    /**
-     * Regular expression for ipv6
-     */
-    const ipv6Regex =
-      '(?!^(?:(?:.*(?:::.*::|:::).*)|::|[0:]+[01]|.*[^:]:|[0-9a-fA-F](?:.*:.*){8}[0-9a-fA-F]|(?:[0-9a-fA-F]:){1,6}[0-9a-fA-F])$)^(?:(::|[0-9a-fA-F]{1,4}:{1,2})([0-9a-fA-F]{1,4}:{1,2}){0,6}([0-9a-fA-F]{1,4}|::)?)$'
-
     /**
      * Regular expression for domain
      */
@@ -47,9 +34,9 @@ class Address {
     /**
      * Type (ipv4 | ipv6 | domain)
      */
-    if (this.host.match(ipv4Regex)) {
+    if (ip.isV4Format(this.host)) {
       this.type = 'ipv4'
-    } else if (this.host.match(ipv6Regex)) {
+    } else if (ip.isV6Format(this.host)) {
       this.type = 'ipv6'
     } else if (this.host.match(domainRegex)) {
       this.type = 'domain'
@@ -66,14 +53,13 @@ class Address {
    * @returns Address
    */
   public static buffToAddrFactory(
-    host: Buffer,
     port: Buffer,
+    host: Buffer,
     type: number
   ): Address {
     let addr
     if (type === ADDRESSTYPES.ipv6 || type === ADDRESSTYPES.ipv4) {
-      addr = ipaddr.fromByteArray(bufToArray(host))
-      addr = addr.toString()
+      addr = ip.toString(host)
     } else {
       addr = host.toString()
     }
@@ -90,11 +76,11 @@ class Address {
     switch (this.type) {
       case 'ipv4':
         type = ADDRESSTYPES.ipv4
-        addr = Buffer.from(ipaddr.parse(this.host).toByteArray())
+        addr = ip.toBuffer(this.host)
         break
       case 'ipv6':
         type = ADDRESSTYPES.ipv6
-        addr = Buffer.from(ipaddr.parse(this.host).toByteArray())
+        addr = ip.toBuffer(this.host)
         break
       default:
         type = ADDRESSTYPES.domain

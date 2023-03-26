@@ -1,65 +1,43 @@
-import { handler, Info } from '../../helper/handler'
-import Writable from '../../helper/writable'
-import { Readable } from '../../helper/readable'
+import { handler } from '../../helper/handler'
 import { COMMANDS, SOCKS4REPLY, SOCKS5REPLY } from '../../helper/constants'
-import net from 'net'
+import Request from '../../helper/request'
+import Reply from '../../helper/reply'
 
 /**
  * Handle connect request
  * @returns void
  */
-export const connect = handler((info, socket, resolve, reject) => {
-  const writeable = new Writable()
-  writeable.push(info.version)
-  if (info.version === 5) {
-    const addressBuff = info.address.toBuffer()
-    if (info.address.type === 'domain') {
-      writeable.push(
-        COMMANDS.connect,
-        0x00,
-        addressBuff.type,
-        addressBuff.host.length,
-        addressBuff.host,
-        addressBuff.port
-      )
-    } else {
-      writeable.push(
-        COMMANDS.connect,
-        0x00,
-        addressBuff.type,
-        addressBuff.host,
-        addressBuff.port
-      )
-    }
-  } else if (info.version === 4) {
-    const addressBuff = info.address.toBuffer()
-    writeable.push(COMMANDS.connect, addressBuff.port, addressBuff.host)
-    if (info.userId) {
-      writeable.push(Buffer.from(info.userId))
-    }
-    writeable.push(Buffer.from([0x00]))
-  }
-  socket.write(writeable.toBuffer())
+export const connect = handler((info, socket, event, resolve, reject) => {
+  const request = new Request(
+    info.version,
+    COMMANDS.connect,
+    info.address,
+    0,
+    info.userId
+  )
+  socket.write(request.toBuffer())
   socket.on('data', (data) => {
-    const readable = new Readable(data)
-    const version = readable.read(1)
-    const reply = readable.read(1)
+    const reply = Reply.from(data)
     if (reject) {
       if (
-        reply.readInt8() !== SOCKS5REPLY.succeeded.code &&
-        reply.readInt8() !== SOCKS4REPLY.granted.code
+        reply.rep !== SOCKS5REPLY.succeeded.code &&
+        reply.rep !== SOCKS4REPLY.granted.code
       ) {
         let msg = ''
-        msg += Object.values(
-          version.readInt8() === 5 ? SOCKS5REPLY : SOCKS4REPLY
-        ).find((rep) => {
-          return rep.code === reply.readInt8()
-        })?.msg
+        msg += Object.values(reply.ver === 5 ? SOCKS5REPLY : SOCKS4REPLY).find(
+          (rep) => {
+            return rep.code === reply.rep
+          }
+        )?.msg
         reject(msg)
       }
     }
     if (resolve) {
-      resolve(socket)
+      resolve({
+        address: reply.addr,
+        socket: socket,
+        rsv: reply.rsv,
+      })
     }
     socket.removeAllListeners('data')
   })

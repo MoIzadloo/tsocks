@@ -1,13 +1,7 @@
-import {
-  ADDRESSTYPES,
-  COMMANDS,
-  SOCKS4REPLY,
-  SOCKSVERSIONS,
-} from '../../helper/constants'
-import Address from '../../helper/address'
+import { COMMANDS, SOCKS4REPLY } from '../../helper/constants'
 import { State } from '../../helper/state'
 import Writable from '../../helper/writable'
-import writable from '../../helper/writable'
+import Request from '../../helper/request'
 
 /**
  * The RequestState class is responsible to handle
@@ -17,39 +11,11 @@ import writable from '../../helper/writable'
  */
 export class RequestState extends State {
   /**
-   * Command (connect | associate | bind)
-   */
-  private cmd?: number
-
-  /**
-   * Destination address
-   */
-  private dstAddr?: Buffer
-
-  /**
-   * Destination port
-   */
-  private dstPort?: Buffer
-
-  /**
-   * Specific for socks4 authentication and identification
-   */
-  private userId?: Buffer
-
-  /**
    * Parse request
    * @returns void
    */
   parse(): void {
-    this.cmd = this.context.read(1).readInt8()
-    this.dstPort = this.context.read(2)
-    this.dstAddr = this.context.read(4)
-    this.context.address = Address.buffToAddrFactory(
-      this.dstAddr,
-      this.dstPort,
-      ADDRESSTYPES.ipv4
-    )
-    this.userId = this.context.readUntil(Buffer.from([0x00]))
+    this.context.request = Request.from(this.context.read())
   }
 
   /**
@@ -59,21 +25,20 @@ export class RequestState extends State {
    */
   reply() {
     if (
-      this.userId &&
-      this.context.address &&
-      !this.context.handlers.userId(this.userId.toString())
+      this.context?.request?.userId &&
+      !this.context.handlers.userId(this.context.request.userId.toString())
     ) {
       const writable = new Writable()
       writable.push(
         0x00,
         SOCKS4REPLY.identFail.code,
-        this.context.address.toBuffer().port,
-        this.context.address.toBuffer().host
+        this.context.request.addr.toBuffer().port,
+        this.context.request.addr.toBuffer().host
       )
       this.context.write(writable)
     }
     this.context.socket.removeAllListeners('data')
-    switch (this.cmd) {
+    switch (this.context?.request?.cmd) {
       case COMMANDS.connect:
         this.context.handlers.req.connect(this.context)
         break

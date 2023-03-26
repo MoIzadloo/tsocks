@@ -36,7 +36,7 @@ class UserPassReqState extends State {
   public handler?: (user: string, pass: string) => boolean
 
   /**
-   * Socks version
+   * SOCKS version
    */
   private version?: Buffer
 

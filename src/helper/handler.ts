@@ -1,6 +1,7 @@
 import Address from './address'
-import Connection from './connection'
+import Connection, { EventTypes } from './connection'
 import * as net from 'net'
+import Event from './event'
 
 export interface Info {
   version: number
@@ -8,11 +9,18 @@ export interface Info {
   userId?: string
 }
 
+export interface HandlerResolve {
+  socket: net.Socket
+  address: Address
+  rsv?: number
+}
+
 export type Handler = (
   info: Info,
   socket: net.Socket,
-  resolve?: (value: net.Socket | PromiseLike<net.Socket>) => void,
-  reject?: (reason?: any) => void
+  event?: Event<EventTypes>,
+  resolve?: (value: PromiseLike<HandlerResolve> | HandlerResolve) => void,
+  reject?: ((reason?: any) => void) | undefined
 ) => void
 
 /**
@@ -23,14 +31,15 @@ export type Handler = (
 export const handler =
   (callback: Handler) =>
   (connection: Connection): void => {
-    if (connection.version && connection.address) {
+    if (connection.request) {
       callback(
         {
-          version: connection.version,
-          address: connection.address,
-          userId: connection.userId,
+          version: connection.request.ver,
+          address: connection.request.addr,
+          userId: connection.request.userId,
         },
         connection.socket,
+        connection.event,
         connection.resolve,
         connection.reject
       )

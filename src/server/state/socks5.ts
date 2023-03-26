@@ -1,6 +1,5 @@
-import Address from '../../helper/address'
-import { SOCKSVERSIONS, ADDRESSTYPES, COMMANDS } from '../../helper/constants'
-
+import { SOCKSVERSIONS, COMMANDS } from '../../helper/constants'
+import Request from '../../helper/request'
 import * as socks4 from './socks4'
 import { State } from '../../helper/state'
 import Authenticator from '../auth/authenticator'
@@ -20,7 +19,7 @@ export class IdentifierState extends State {
    * @returns void
    */
   parse(): void {
-    this.firstByte = this.context.read(1)
+    this.firstByte = this.context.cat(1)
   }
 
   /**
@@ -28,7 +27,6 @@ export class IdentifierState extends State {
    * @returns void
    */
   reply(): void {
-    let version = SOCKSVERSIONS.socks5
     if (
       this.firstByte?.readInt8() === SOCKSVERSIONS.socks5 &&
       this.context.options.socks5
@@ -38,13 +36,11 @@ export class IdentifierState extends State {
       this.firstByte?.readInt8() === SOCKSVERSIONS.socks4 &&
       this.context.options.socks4
     ) {
-      version = SOCKSVERSIONS.socks4
       this.transitionTo(new socks4.RequestState(this.context))
     } else {
       this.context.socket.removeAllListeners('data')
       return
     }
-    this.context.version = version
     this.context.parse()
     this.context.reply()
   }
@@ -68,6 +64,7 @@ export class MethodSelectionState extends State {
    * @returns void
    */
   parse() {
+    this.context.read(1)
     const methodsNum = this.context.read(1).readInt8()
     for (let i = 0; i < methodsNum; i++) {
       this.methods.push(this.context.read(1).readInt8())
@@ -91,41 +88,12 @@ export class MethodSelectionState extends State {
  * References: {@link https://www.rfc-editor.org/rfc/rfc1928#section-4}
  */
 export class RequestState extends State {
-  private cmd?: number
-  private dstAddr?: Buffer
-  private dstPort?: Buffer
-  private atype?: number
-
   /**
    * Parse request
    * @returns  void
    */
   parse(): void {
-    const version = this.context.read(1).readInt8()
-    if (version !== this.context.version) {
-      this.context.socket.removeAllListeners('data')
-      return
-    }
-    this.cmd = this.context.read(1).readInt8()
-    this.context.read(1).readInt8()
-    this.atype = this.context.read(1).readInt8()
-    switch (this.atype) {
-      case ADDRESSTYPES.ipv4:
-        this.dstAddr = this.context.read(4)
-        break
-      case ADDRESSTYPES.ipv6:
-        this.dstAddr = this.context.read(16)
-        break
-      default:
-        this.dstAddr = this.context.read(this.context.read(1).readInt8())
-        break
-    }
-    this.dstPort = this.context.read(2)
-    this.context.address = Address.buffToAddrFactory(
-      this.dstAddr,
-      this.dstPort,
-      this.atype
-    )
+    this.context.request = Request.from(this.context.read())
   }
 
   /**
@@ -135,7 +103,7 @@ export class RequestState extends State {
    */
   reply() {
     this.context.socket.removeAllListeners('data')
-    switch (this.cmd) {
+    switch (this.context.request?.cmd) {
       case COMMANDS.connect:
         this.context.handlers.req.connect(this.context)
         break
