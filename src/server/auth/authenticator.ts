@@ -2,7 +2,7 @@ import Connection from '../../helper/connection'
 import { Handlers } from '../../helper/handlers'
 import Writable from '../../helper/writable'
 import { none } from './methods'
-import {SOCKSVERSIONS} from "../../helper/constants";
+import { SOCKSVERSIONS } from '../../helper/constants'
 
 /**
  * The Authenticator Class is responsible for resolving incoming

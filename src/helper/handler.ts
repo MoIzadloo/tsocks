@@ -36,7 +36,7 @@ export const handler =
         {
           version: connection.request.ver,
           address: connection.request.addr,
-          userId: connection.userId,
+          userId: connection.request.userId,
         },
         connection.socket,
         connection.event,

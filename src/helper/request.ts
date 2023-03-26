@@ -35,7 +35,11 @@ class Request {
     if (this.ver === SOCKSVERSIONS.socks5) {
       writeable.push(this.rsv, buffAddr.type, host, buffAddr.port)
     } else {
-      writeable.push(buffAddr.port, host, this.userId, 0x00)
+      writeable.push(buffAddr.port, host)
+      if (this.userId) {
+        writeable.push(Buffer.from(this.userId))
+      }
+      writeable.push(0x00)
     }
     return writeable.toBuffer()
   }
@@ -67,7 +71,7 @@ class Request {
     } else {
       dstPort = readable.read(2)
       dstAddr = readable.read(4)
-      userId = readable.readUntil(Buffer.from([0x00])).toString()
+      userId = readable.readUntil(-1).toString()
       atype = ADDRESSTYPES.ipv4
     }
     const addr = Address.buffToAddrFactory(dstPort, dstAddr, atype)

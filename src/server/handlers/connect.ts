@@ -1,4 +1,4 @@
-import { handler, Info } from '../../helper/handler'
+import { handler } from '../../helper/handler'
 import net from 'net'
 import { SOCKS5REPLY, SOCKSVERSIONS, SOCKS4REPLY } from '../../helper/constants'
 import Reply from '../../helper/reply'

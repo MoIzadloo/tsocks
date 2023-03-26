@@ -44,10 +44,19 @@ class Readable {
    * @param value - Buffer in which the reading process continues until it appears
    * @returns Buffer
    */
-  public readUntil(value: Buffer): Buffer {
-    const buffIndex = this.data.indexOf(value)
-    const slice = this.data.subarray(0, buffIndex)
-    this.data = this.data.subarray(buffIndex, this.data.length)
+  public readUntil(value: Buffer | number): Buffer {
+    let slice
+    if (value instanceof Buffer) {
+      const buffIndex = this.data.indexOf(value)
+      slice = this.data.subarray(0, buffIndex)
+      this.data = this.data.subarray(buffIndex, this.data.length)
+    } else {
+      if (value <= -1) {
+        value = this.data.length + value
+      }
+      slice = this.data.subarray(0, value)
+      this.data = this.data.subarray(value, this.data.length)
+    }
     return slice
   }
 }

@@ -156,10 +156,9 @@ both useAuth and useIdent together.
 
 ### Associate (UDP Relay)
 
-The Associate command assists you to send UDP packets to a remote host through the proxy server.
+The associate command assists you to send UDP packets to a remote host through the proxy server.
 the relay will listen for packets on the same port number as the SOCKS server does, and it doesn't support fragmentation however,
-you could replace it with your own implementation with the help of
-the useReq hook
+you could replace it with your own implementation with the help of the useReq hook
 
 ```typescript
 import { createServer } from 'tsocks'
@@ -229,20 +228,24 @@ you can easily implement it in a matter of seconds.
    const port = 1080
    const httpPort = 80
 
-   const socket = await connect(port, host, 5).connect(httpPort, 'google.com')
+   try {
+     const info = await connect(port, host, 5).connect(httpPort, 'google.com')
 
-   socket.write(
-     Buffer.from(
-       'GET / HTTP/1.1\r\n' +
-         'Host: www.google.com:80\r\n' +
-         'Connection: close\r\n' +
-         '\r\n'
+     info.socket.write(
+       Buffer.from(
+         'GET / HTTP/1.1\r\n' +
+           'Host: www.google.com:80\r\n' +
+           'Connection: close\r\n' +
+           '\r\n'
+       )
      )
-   )
 
-   socket.on('data', (data) => {
-     console.log(data)
-   })
+     info.socket.on('data', (data) => {
+       console.log(data)
+     })
+   } catch (err) {
+     console.log(err)
+   }
    ```
 
 2. Multiple connections
@@ -256,35 +259,43 @@ you can easily implement it in a matter of seconds.
 
    const client = connect(port, host, 5)
 
-   const socket1 = await client.connect(httpPort, 'google.com')
+   try {
+     const info1 = await client.connect(httpPort, 'google.com')
 
-   socket1.write(
-     Buffer.from(
-       'GET / HTTP/1.1\r\n' +
-         'Host: www.google.com:80\r\n' +
-         'Connection: close\r\n' +
-         '\r\n'
+     info1.socket.write(
+       Buffer.from(
+         'GET / HTTP/1.1\r\n' +
+           'Host: www.google.com:80\r\n' +
+           'Connection: close\r\n' +
+           '\r\n'
+       )
      )
-   )
 
-   socket1.on('data', (data) => {
-     console.log(data)
-   })
+     info1.socket.on('data', (data) => {
+       console.log(data)
+     })
+   } catch (err) {
+     console.log(err)
+   }
 
-   const socket2 = await client.connect(httpPort, 'google.com')
+   try {
+     const info2 = await client.connect(httpPort, 'google.com')
 
-   socket2.write(
-     Buffer.from(
-       'GET / HTTP/1.1\r\n' +
-         'Host: www.google.com:80\r\n' +
-         'Connection: close\r\n' +
-         '\r\n'
+     info2.socket.write(
+       Buffer.from(
+         'GET / HTTP/1.1\r\n' +
+           'Host: www.google.com:80\r\n' +
+           'Connection: close\r\n' +
+           '\r\n'
+       )
      )
-   )
 
-   socket2.on('data', (data) => {
-     console.log(data)
-   })
+     info2.socket.on('data', (data) => {
+       console.log(data)
+     })
+   } catch (err) {
+     console.log(err)
+   }
    ```
 
 ### Proxy client with authentication
@@ -310,22 +321,26 @@ as an argument (userId) to the request handler (connect | bind | associate).
    const password = 'pass'
    const httpPort = 80
 
-   const socket = await connect(port, host, 5)
-     .useAuth(clientAuthMethods.userPass(username, password))
-     .connect(httpPort, 'google.com')
+   try {
+     const info = await connect(port, host, 5)
+       .useAuth(clientAuthMethods.userPass(username, password))
+       .connect(httpPort, 'google.com')
 
-   socket.write(
-     Buffer.from(
-       'GET / HTTP/1.1\r\n' +
-         'Host: www.google.com:80\r\n' +
-         'Connection: close\r\n' +
-         '\r\n'
+     info.socket.write(
+       Buffer.from(
+         'GET / HTTP/1.1\r\n' +
+           'Host: www.google.com:80\r\n' +
+           'Connection: close\r\n' +
+           '\r\n'
+       )
      )
-   )
 
-   socket.on('data', (data) => {
-     console.log(data)
-   })
+     info.socket.on('data', (data) => {
+       console.log(data)
+     })
+   } catch (err) {
+     console.log(err)
+   }
    ```
 
 2. Identification socks4
@@ -338,24 +353,85 @@ as an argument (userId) to the request handler (connect | bind | associate).
    const userId = 'user:pass'
    const httpPort = 80
 
-   const socket = await connect(port, host, 4, userId).connect(
-     httpPort,
-     '142.251.1.101'
-   )
-
-   socket.write(
-     Buffer.from(
-       'GET / HTTP/1.1\r\n' +
-         'Host: www.google.com:80\r\n' +
-         'Connection: close\r\n' +
-         '\r\n'
+   try {
+     const info = await connect(port, host, 4, userId).connect(
+       httpPort,
+       '142.251.1.101'
      )
-   )
 
-   socket.on('data', (data) => {
-     console.log(data)
-   })
+     info.socket.write(
+       Buffer.from(
+         'GET / HTTP/1.1\r\n' +
+           'Host: www.google.com:80\r\n' +
+           'Connection: close\r\n' +
+           '\r\n'
+       )
+     )
+
+     info.socket.on('data', (data) => {
+       console.log(data)
+     })
+   } catch (err) {
+     console.log(err)
+   }
    ```
+
+### Associate (UDP Relay)
+
+The associate command assists you to send UDP packets to a remote host through the proxy server.
+after sending an associate request the server will reply with the information about the relays host and port
+with that information, you can create a datagram socket and send your UDP packets to the address of the relay to get relayed.
+as you can see in the example below you have to wrap your data with the createUdpFrame and also unwrap it with parseUdpFrame as it's part of the protocol
+
+```typescript
+import {
+  createServer,
+  connect,
+  createUdpFrame,
+  parseUdpFrame,
+  Address,
+} from 'tsocks'
+import * as dgram from 'dgram'
+
+const host = '127.0.0.1'
+const port = 1080
+
+// Create simple socks server
+const server = createServer()
+server.listen(port, host)
+
+// Creates a simple echo server that returns whatever you send
+const echoServerPort = 5467
+const echoServer = dgram.createSocket('udp4')
+echoServer.on('message', (msg, rinfo) => {
+  echoServer.send(msg, rinfo.port, rinfo.address)
+})
+echoServer.bind(echoServerPort)
+
+try {
+  // Send an associate request
+  const info = await connect(port, host, 5).associate(0, '0.0.0.0')
+  const udpSocket = dgram.createSocket('udp4')
+  udpSocket.send(
+    createUdpFrame(
+      new Address(echoServerPort, '127.0.0.1'),
+      Buffer.from('Hello')
+    ),
+    info.address.port,
+    info.address.host
+  )
+  udpSocket.once('message', (msg) => {
+    const parsedMsg = parseUdpFrame(msg)
+    console.log(parsedMsg.data.toString())
+  })
+
+  info.socket.on('data', (data) => {
+    console.log(data)
+  })
+} catch (err) {
+  console.log(err)
+}
+```
 
 ## References
 

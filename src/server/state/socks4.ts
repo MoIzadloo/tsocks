@@ -1,5 +1,4 @@
-import { ADDRESSTYPES, COMMANDS, SOCKS4REPLY } from '../../helper/constants'
-import Address from '../../helper/address'
+import { COMMANDS, SOCKS4REPLY } from '../../helper/constants'
 import { State } from '../../helper/state'
 import Writable from '../../helper/writable'
 import Request from '../../helper/request'

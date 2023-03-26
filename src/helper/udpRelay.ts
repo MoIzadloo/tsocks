@@ -1,4 +1,4 @@
-import dgram from 'node:dgram'
+import * as dgram from 'dgram'
 import Address from './address'
 import * as Buffer from 'buffer'
 import Writable from './writable'

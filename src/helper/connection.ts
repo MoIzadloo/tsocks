@@ -5,7 +5,6 @@ import { IdentifierState } from '../server/state/socks5'
 import Writable from './writable'
 import { Handlers } from './handlers'
 import { HandlerResolve } from './handler'
-import Address from './address'
 import Event from './event'
 import Request from './request'
 
@@ -69,11 +68,6 @@ class Connection {
     socks4: true,
   }
 
-  /**
-   * UserId for socks4 client
-   */
-  userId?: string
-
   request?: Request
 
   constructor(
@@ -135,7 +129,7 @@ class Connection {
    * @param value - Buffer in which the reading process continues until it appears
    * @returns Buffer
    */
-  public readUntil(value: Buffer): Buffer {
+  public readUntil(value: Buffer | number): Buffer {
     return this.readable.readUntil(value)
   }
 

@@ -25,6 +25,12 @@ module.exports = {
     ],
   },
   resolve: {
+    fallback: {
+      net: false,
+      os: false,
+      dgram: false,
+      buffer: false,
+    },
     extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
 }

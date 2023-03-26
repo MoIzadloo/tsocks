@@ -7,7 +7,7 @@ import { HandlerResolve } from '../helper/handler'
 import Authenticator from './auth/authenticator'
 import Address from '../helper/address'
 import { AuthMethod } from '../helper/authMethod'
-import { COMMANDS, SOCKSVERSIONS } from '../helper/constants'
+import { COMMANDS } from '../helper/constants'
 import Request from '../helper/request'
 
 /**
@@ -82,7 +82,7 @@ export class Client {
     } else {
       id = this.userId
     }
-    connection.request = new Request(ver, cmd, address)
+    connection.request = new Request(ver, cmd, address, 0, id)
     connection.resolve = resolve
     connection.reject = reject
 

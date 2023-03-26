@@ -3,10 +3,11 @@ import {
   connect,
   clientAuthMethods,
   serverAuthMethods,
+  createUdpFrame,
+  parseUdpFrame,
 } from '../src'
 import { SOCKS5REPLY } from '../src/helper/constants'
-import dgram from 'dgram'
-import UdpRelay from '../src/helper/udpRelay'
+import * as dgram from 'dgram'
 import Address from '../src/helper/address'
 import * as dns from 'dns'
 
@@ -48,10 +49,10 @@ describe('client socks5 (connect | associate | bind)', () => {
       })
   })
 
-  test('associate', (done) =>{
+  test('associate', (done) => {
     connect(serverPort, serverHost, 5)
       .associate(0, '0.0.0.0')
-      .then(info => {
+      .then((info) => {
         const udpSocket = dgram.createSocket('udp4')
         dns.setServers([`127.0.0.1:${fakeDnsPort}`])
         dns.resolve('google.com', (err, addresses) => {
@@ -61,21 +62,18 @@ describe('client socks5 (connect | associate | bind)', () => {
         })
         fakeDnsServer.on('message', (msg, rinfo) => {
           udpSocket.send(
-            UdpRelay.createUdpFrame(
-              new Address(53, '8.8.8.8'),
-              Buffer.from(msg)
-            ),
+            createUdpFrame(new Address(53, '8.8.8.8'), Buffer.from(msg)),
             info.address.port,
             info.address.host
           )
           udpSocket.once('message', (msg) => {
-            const parsedMsg = UdpRelay.parseUdpFrame(msg)
+            const parsedMsg = parseUdpFrame(msg)
             fakeDnsServer.send(parsedMsg.data, rinfo.port, rinfo.address)
           })
         })
         udpSocket.bind()
       })
-      .catch(reason => {
+      .catch((reason) => {
         console.log(reason)
         expect(true).toBe(false)
       })

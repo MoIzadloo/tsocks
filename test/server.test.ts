@@ -18,7 +18,7 @@ describe('server socks5 (connect | associate | bind)', () => {
   beforeAll((done) => {
     server.listen(serverPort, '127.0.0.1')
     echoServer.on('message', (msg, rinfo) => {
-      echoServer.send(Buffer.from('Hi'), rinfo.port, rinfo.address)
+      echoServer.send(msg, rinfo.port, rinfo.address)
     })
     echoServer.bind(echoServerPort)
     done()
@@ -68,7 +68,7 @@ describe('server socks5 (connect | associate | bind)', () => {
     })
   })
 
-  test('associate greeting server', (done) => {
+  test('associate echo server', (done) => {
     const client = net.connect(serverPort, '127.0.0.1')
     const states = ['identifier', 'request']
     let state = 0
@@ -96,7 +96,7 @@ describe('server socks5 (connect | associate | bind)', () => {
           const udpSocket = dgram.createSocket('udp4')
           udpSocket.on('message', (msg, rinfo) => {
             const parsedMsg = UdpRelay.parseUdpFrame(msg)
-            expect(parsedMsg.data.toString()).toBe('Hi')
+            expect(parsedMsg.data.toString()).toBe('Hey')
             udpSocket.close()
             echoServer.close()
             done()
@@ -267,6 +267,7 @@ describe('server check hooks (userReq | useIdent)', () => {
       expect(info).toEqual({
         version: 0x04,
         address: google,
+        userId: id,
       })
       done()
     })
