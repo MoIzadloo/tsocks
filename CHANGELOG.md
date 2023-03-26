@@ -1,3 +1,10 @@
+# [v3.1.0](https://github.com/MoIzadloo/tsocks/compare/v3.0.0...v3.1.0) (2023-03-26)
+
+## ✨ New Features
+- [`64443ec`](https://github.com/MoIzadloo/tsocks/commit/64443ec)  feat: Add server associate implementation 
+- [`250aa30`](https://github.com/MoIzadloo/tsocks/commit/250aa30)  feat: Client associate completed 
+- [`855a07a`](https://github.com/MoIzadloo/tsocks/commit/855a07a)  feat: Add associate support
+
 # [v3.0.0](https://github.com/MoIzadloo/tsocks/compare/v2.0.0...v3.0.0) (2023-03-14)
 
 ## ✨ New Features
