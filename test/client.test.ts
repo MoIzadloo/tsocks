@@ -6,10 +6,12 @@ import {
   createUdpFrame,
   parseUdpFrame,
 } from '../src'
-import { SOCKS5REPLY } from '../src/helper/constants'
+import { ADDRESSTYPES, SOCKS5REPLY } from '../src/helper/constants'
 import * as dgram from 'dgram'
 import Address from '../src/helper/address'
 import * as dns from 'dns'
+import net from 'net'
+import Readable from '../src/helper/readable'
 
 jest.setTimeout(20000)
 const serverPort = 3369
@@ -79,6 +81,49 @@ describe('client socks5 (connect | associate | bind)', () => {
       })
   })
 
+  test('bind', (done) => {
+    connect(serverPort, serverHost, 5)
+      .bind(0, '0.0.0.0')
+      .then((info) => {
+        const remote = net.connect(info.address.port, info.address.host)
+        const states = ['information', 'relay']
+        let readable, port, host, atype, relayAddr
+        let state = 0
+        info.socket.on('data', (data) => {
+          switch (states[state]) {
+            case states[1]:
+              expect(data.toString()).toBe('Hello')
+              remote.destroy()
+              info.socket.destroy()
+              done()
+              break
+            default:
+              readable = new Readable(data)
+              readable.read(3)
+              atype = readable.read(1).readInt8()
+              switch (atype) {
+                case ADDRESSTYPES.ipv4:
+                  host = readable.read(4)
+                  break
+                case ADDRESSTYPES.ipv6:
+                  host = readable.read(16)
+                  break
+                default:
+                  host = readable.read(readable.read(1).readInt8())
+                  break
+              }
+              port = readable.read(2)
+              relayAddr = Address.buffToAddrFactory(port, host, atype)
+              remote.write(Buffer.from('Hello'))
+              state++
+          }
+        })
+      })
+      .catch((reason) => {
+        expect(true).toBe(false)
+      })
+  })
+
   test('connect to wrong domain', () => {
     return expect(
       connect(serverPort, serverHost, 5).connect(httpPort, 'dummy-url.c')
@@ -114,6 +159,42 @@ describe('client socks4 (connect | associate | bind)', () => {
           info.socket.destroy()
           expect(data.toString()).toMatch(/20[01] OK/)
           done()
+        })
+      })
+      .catch((reason) => {
+        expect(true).toBe(false)
+      })
+  })
+
+  test('bind', (done) => {
+    connect(serverPort, serverHost, 4)
+      .bind(0, '0.0.0.0')
+      .then((info) => {
+        const remote = net.connect(info.address.port, info.address.host)
+        const states = ['information', 'relay']
+        let readable, port, host, relayAddr
+        let state = 0
+        info.socket.on('data', (data) => {
+          switch (states[state]) {
+            case states[1]:
+              expect(data.toString()).toBe('Hello')
+              remote.destroy()
+              info.socket.destroy()
+              done()
+              break
+            default:
+              readable = new Readable(data)
+              readable.read(3)
+              port = readable.read(2)
+              host = readable.read(4)
+              relayAddr = Address.buffToAddrFactory(
+                port,
+                host,
+                ADDRESSTYPES.ipv4
+              )
+              remote.write(Buffer.from('Hello'))
+              state++
+          }
         })
       })
       .catch((reason) => {
@@ -187,6 +268,34 @@ describe('client check authentication and identification', () => {
       .catch((reason) => {
         expect(true).toBe(false)
       })
+  })
+
+  afterAll((done) => {
+    server.close()
+    done()
+  })
+})
+
+describe('client check useReq', () => {
+  const server = createServer()
+  beforeAll((done) => {
+    server.listen(serverPort, serverHost)
+    done()
+  })
+
+  test('useReq connect', (done) => {
+    let google = new Address(httpPort, '142.251.1.101')
+    const id = 'tsocks:tsocks'
+    connect(serverPort, serverHost, 4, id)
+      .useReq('connect', (info, socket, event, resolve, reject) => {
+        expect(info).toEqual({
+          version: 0x04,
+          address: google,
+          userId: id,
+        })
+        done()
+      })
+      .connect(httpPort, '142.251.1.101')
   })
 
   afterAll((done) => {

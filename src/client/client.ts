@@ -3,7 +3,11 @@ import Event from '../helper/event'
 import Connection, { EventTypes } from '../helper/connection'
 import * as handlers from './handlers/index'
 import { Handlers } from '../helper/handlers'
-import { HandlerResolve } from '../helper/handler'
+import {
+  handler as reqHandler,
+  Handler,
+  HandlerResolve,
+} from '../helper/handler'
 import Authenticator from './auth/authenticator'
 import Address from '../helper/address'
 import { AuthMethod } from '../helper/authMethod'
@@ -92,6 +96,29 @@ export class Client {
     return connection
   }
 
+  bind(port: number, host: string, version?: 4 | 5, userId?: string) {
+    return new Promise<HandlerResolve>((resolve, reject) => {
+      const connection = this.connector(
+        port,
+        host,
+        COMMANDS.bind,
+        resolve,
+        reject,
+        version,
+        userId
+      )
+      if (connection?.request?.ver === 5) {
+        const authenticator = new Authenticator(connection)
+        authenticator.authenticate()
+      } else if (connection?.request?.ver === 4) {
+        if (connection?.request?.addr?.type === 'domain') {
+          reject('The Address type is not supported')
+        }
+        connection.handlers.req.bind(connection)
+      }
+    })
+  }
+
   associate(port: number, host: string, version?: 4 | 5) {
     return new Promise<HandlerResolve>((resolve, reject) => {
       if (version === 5 || (!version && this.version === 5)) {
@@ -149,6 +176,17 @@ export class Client {
    */
   public useAuth(handler: AuthMethod): Client {
     this.handlers.auth.push(handler)
+    return this
+  }
+
+  /**
+   * Get the handler function, and update this.handlers.req
+   * @param cmd - Specify handler type (connect | associate | bind)
+   * @param handler - Emitted when new request appears
+   * @returns Server
+   */
+  public useReq(cmd: keyof Handlers['req'], handler: Handler): Client {
+    this.handlers.req[cmd] = reqHandler(handler)
     return this
   }
 }

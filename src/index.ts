@@ -1,5 +1,6 @@
 import { createServer } from './server/server'
 import { connect } from './client/client'
+import { EventTypes } from './helper/connection'
 import * as serverAuthMethods from './server/auth/methods'
 import * as clientAuthMethods from './client/auth/methods'
 import udpRelay from './helper/udpRelay'
@@ -16,4 +17,5 @@ export {
   parseUdpFrame,
   createUdpFrame,
   Address,
+  EventTypes,
 }

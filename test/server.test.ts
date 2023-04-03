@@ -12,7 +12,7 @@ const httpPort = 80
 
 describe('server socks5 (connect | associate | bind)', () => {
   const server = createServer()
-  const echoServerPort = 5467
+  const echoServerPort = 4567
   const echoServer = dgram.createSocket('udp4')
 
   beforeAll((done) => {
@@ -131,6 +131,80 @@ describe('server socks5 (connect | associate | bind)', () => {
     })
   })
 
+  test('bind', (done) => {
+    const client = net.connect(serverPort, '127.0.0.1')
+    const states = ['identifier', 'request', 'information', 'relay']
+    let state = 0
+    let readable, atype, port, host, relayAddr, remote: net.Socket
+    client.write(Buffer.from([SOCKSVERSIONS.socks5, 0x01, 0x00]))
+    client.on('data', (data) => {
+      switch (states[state]) {
+        case states[3]:
+          expect(data.toString()).toBe('Hello')
+          client.destroy()
+          remote.destroy()
+          done()
+          break
+        case states[2]:
+          readable = new Readable(data)
+          readable.read(3)
+          atype = readable.read(1).readInt8()
+          switch (atype) {
+            case ADDRESSTYPES.ipv4:
+              host = readable.read(4)
+              break
+            case ADDRESSTYPES.ipv6:
+              host = readable.read(16)
+              break
+            default:
+              host = readable.read(readable.read(1).readInt8())
+              break
+          }
+          port = readable.read(2)
+          relayAddr = Address.buffToAddrFactory(port, host, atype)
+          remote.write(Buffer.from('Hello'))
+          state++
+          break
+        case states[1]:
+          readable = new Readable(data)
+          readable.read(3)
+          atype = readable.read(1).readInt8()
+          switch (atype) {
+            case ADDRESSTYPES.ipv4:
+              host = readable.read(4)
+              break
+            case ADDRESSTYPES.ipv6:
+              host = readable.read(16)
+              break
+            default:
+              host = readable.read(readable.read(1).readInt8())
+              break
+          }
+          port = readable.read(2)
+          relayAddr = Address.buffToAddrFactory(port, host, atype)
+          remote = net.connect(relayAddr.port, relayAddr.host)
+          ++state
+          break
+        default:
+          const address = new Address(0, '0.0.0.0').toBuffer()
+          client.write(
+            Buffer.concat([
+              Buffer.from([
+                SOCKSVERSIONS.socks5,
+                COMMANDS.bind,
+                0x00,
+                address.type,
+              ]),
+              address.host,
+              address.port,
+            ])
+          )
+          ++state
+          break
+      }
+    })
+  })
+
   afterAll((done) => {
     server.close()
     done()
@@ -222,6 +296,50 @@ describe('server socks4 check (connect | associate | bind)', () => {
                 '\r\n'
             )
           )
+          ++state
+          break
+      }
+    })
+  })
+
+  test('bind', (done) => {
+    const client = net.connect(serverPort, '127.0.0.1')
+    const states = ['request', 'information', 'relay']
+    let state = 0
+    let readable, port, host, relayAddr, remote: net.Socket
+    relayAddr = new Address(0, '0.0.0.0').toBuffer()
+    client.write(
+      Buffer.concat([
+        Buffer.from([SOCKSVERSIONS.socks4, COMMANDS.bind]),
+        relayAddr.port,
+        relayAddr.host,
+        Buffer.from([0x00]),
+      ])
+    )
+    client.on('data', (data) => {
+      switch (states[state]) {
+        case states[2]:
+          expect(data.toString()).toBe('Hello')
+          client.destroy()
+          remote.destroy()
+          done()
+          break
+        case states[1]:
+          readable = new Readable(data)
+          readable.read(3)
+          port = readable.read(2)
+          host = readable.read(4)
+          relayAddr = Address.buffToAddrFactory(port, host, ADDRESSTYPES.ipv4)
+          remote.write(Buffer.from('Hello'))
+          state++
+          break
+        default:
+          readable = new Readable(data)
+          readable.read(2)
+          port = readable.read(2)
+          host = readable.read(4)
+          relayAddr = Address.buffToAddrFactory(port, host, ADDRESSTYPES.ipv4)
+          remote = net.connect(relayAddr.port, relayAddr.host)
           ++state
           break
       }

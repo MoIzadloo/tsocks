@@ -1,5 +1,5 @@
 import { handler } from '../../helper/handler'
-import { COMMANDS, SOCKS4REPLY, SOCKS5REPLY } from '../../helper/constants'
+import { COMMANDS } from '../../helper/constants'
 import Request from '../../helper/request'
 import Reply from '../../helper/reply'
 
@@ -12,26 +12,8 @@ export const associate = handler((info, socket, event, resolve, reject) => {
   socket.write(request.toBuffer())
   socket.on('data', (data) => {
     const reply = Reply.from(data)
-    if (reject) {
-      if (
-        reply.rep !== SOCKS5REPLY.succeeded.code &&
-        reply.rep !== SOCKS4REPLY.granted.code
-      ) {
-        let msg = ''
-        msg += Object.values(reply.ver === 5 ? SOCKS5REPLY : SOCKS4REPLY).find(
-          (rep) => {
-            return rep.code === reply.rep
-          }
-        )?.msg
-        reject(msg)
-      }
-    }
-    if (resolve) {
-      resolve({
-        address: reply.addr,
-        socket: socket,
-        rsv: reply.rsv,
-      })
+    if (resolve && reject) {
+      reply.promiseHandler(socket, resolve, reject)
     }
     socket.removeAllListeners('data')
   })

@@ -1,7 +1,14 @@
 import Address from './address'
 import Readable from './readable'
-import { ADDRESSTYPES, SOCKSVERSIONS } from './constants'
+import {
+  ADDRESSTYPES,
+  SOCKS4REPLY,
+  SOCKS5REPLY,
+  SOCKSVERSIONS,
+} from './constants'
 import Writable from './writable'
+import { HandlerResolve } from './handler'
+import * as net from 'net'
 
 class Replay {
   public ver: number
@@ -62,6 +69,34 @@ class Replay {
     }
     const addr = Address.buffToAddrFactory(dstPort, dstAddr, atype)
     return new Replay(ver, rep, addr, rsv)
+  }
+
+  promiseHandler(
+    socket: net.Socket,
+    resolve: (value: PromiseLike<HandlerResolve> | HandlerResolve) => void,
+    reject: (reason?: any) => void
+  ) {
+    if (reject) {
+      if (
+        this.rep !== SOCKS5REPLY.succeeded.code &&
+        this.rep !== SOCKS4REPLY.granted.code
+      ) {
+        let msg = ''
+        msg += Object.values(this.ver === 5 ? SOCKS5REPLY : SOCKS4REPLY).find(
+          (rep) => {
+            return rep.code === this.rep
+          }
+        )?.msg
+        reject(msg)
+      }
+    }
+    if (resolve) {
+      resolve({
+        address: this.addr,
+        socket: socket,
+        rsv: this.rsv,
+      })
+    }
   }
 }
 
