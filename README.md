@@ -212,11 +212,13 @@ server.useReq('bind', (info, socket) => {
   // You can implement the rest how ever you want or reject the request
   // With the proper reply code as blow
   // Remember the response should be decided by the version
+  let reply
   if (version === 5) {
-    const reply = new Reply(version, 0x07, info.address)
+    reply = new Reply(version, 0x07, info.address)
   } else {
-    const reply = new Reply(version, 0x5b, info.address)
+    reply = new Reply(version, 0x5b, info.address)
   }
+  socket.write(reply.toBuffer())
 })
 
 server.listen(port, host)
