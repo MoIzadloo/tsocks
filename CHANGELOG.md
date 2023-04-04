@@ -1,3 +1,5 @@
+# [v3.2.3](https://github.com/MoIzadloo/tsocks/compare/v3.2.2...v3.2.3) (2023-04-04)
+
 # [v3.2.2](https://github.com/MoIzadloo/tsocks/compare/v3.2.1...v3.2.2) (2023-04-04)
 
 # [v3.2.1](https://github.com/MoIzadloo/tsocks/compare/v3.2.0...v3.2.1) (2023-04-04)
