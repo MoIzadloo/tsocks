@@ -66,13 +66,13 @@ server.listen(port, host)
 
 There are two different authentication methods independent
 of which version of the SOCKS protocol you are working with.
-in case you are using V5, you can use the useAuth hook and use
+In case you are using V5, you can use the useAuth hook and use
 one of the available methods from the [methods'](src/server/auth/methods)
-directory, or if you want to create your own implementations or
+directory, or if you want to create your implementations or
 custom methods, you have to define a function that implements the
-AuthMethod interface, like [userPass.ts](src/server/auth/methods/userPass.ts) and pass it as an argument to useAuth hook, in case you are using V4 you have to use useIdent hook which receives a callback function which gives you userId, a string in which
+AuthMethod interface, like [userPass.ts](src/server/auth/methods/userPass.ts) and pass it as an argument to useAuth hook, in case you are using V4 you have to use useIdent hook which receives a callback function that gives you userId, a string in which
 should be processed and the result, which is going to be
-a boolean should be return from the callback function, in case you want to support
+a boolean should be returned from the callback function, in case you want to support
 both versions and also authenticate users on both you can use
 both useAuth and useIdent together.
 
@@ -157,8 +157,8 @@ both useAuth and useIdent together.
 ### Associate (UDP Relay)
 
 The associate command assists you to send UDP packets to a remote host through the proxy server.
-the relay will listen for packets on the same port number as the SOCKS server does, and it doesn't support fragmentation however,
-you could replace it with your own implementation with the help of the useReq hook
+the relay will listen for packets on the same port number as the SOCKS server does, and it doesn't support fragmentation, however,
+you could replace it with your implementation with the help of the useReq hook.
 
 ```typescript
 import { createServer } from 'tsocks'
@@ -343,9 +343,9 @@ you can easily implement it in a matter of seconds.
 
 There are two different authentication methods independent
 of which version of the SOCKS protocol you are working with.
-in case you are using V5, you can use the useAuth hook and use
+In case you are using V5, you can use the useAuth hook and use
 one of the available methods from the [methods'](src/client/auth/methods)
-directory, or if you want to create your own implementations or
+directory, or if you want to create your implementations or
 custom methods, you have to define a function that implements the
 AuthMethod interface, like [userPass.ts](src/client/auth/methods/userPass.ts) and pass it as an argument to useAuth hook,
 in case you are using V4 you have to add your identification token
@@ -422,7 +422,7 @@ as an argument (userId) to the request handler (connect | bind | associate).
 The associate command assists you to send UDP packets to a remote host through the proxy server.
 after sending an associate request the server will reply with the information about the relays host and port
 with that information, you can create a datagram socket and send your UDP packets to the address of the relay to get relayed.
-as you can see in the example below you have to wrap your data with the createUdpFrame and also unwrap it with parseUdpFrame as it's part of the protocol
+as you can see in the example below you have to wrap your data with the createUdpFrame and also unwrap it with parseUdpFrame as it's part of the protocol.
 
 ```typescript
 import {
