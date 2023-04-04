@@ -1,3 +1,9 @@
+# [v3.2.0](https://github.com/MoIzadloo/tsocks/compare/v3.1.0...v3.2.0) (2023-04-04)
+
+## ✨ New Features
+- [`c0e3c1d`](https://github.com/MoIzadloo/tsocks/commit/c0e3c1d)  feat: Add bind 
+- [`4e7a101`](https://github.com/MoIzadloo/tsocks/commit/4e7a101)  feat: Add bind
+
 # [v3.1.0](https://github.com/MoIzadloo/tsocks/compare/v3.0.0...v3.1.0) (2023-03-26)
 
 ## ✨ New Features
