@@ -209,8 +209,8 @@ server.useReq('bind', (info, socket) => {
   const port = info.address.port // Port number
   const type = info.address.type // ipv4 | ipv6 | domain
   const version = info.version // SOCKS version
-  // You can implement the rest how ever you want or reject the request
-  // With the proper reply code as blow
+  // You can implement the rest however you want or reject the request
+  // With the proper reply code as below
   // Remember the response should be decided by the version
   let reply
   if (version === 5) {
