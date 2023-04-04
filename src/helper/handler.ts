@@ -13,6 +13,7 @@ export interface HandlerResolve {
   socket: net.Socket
   address: Address
   rsv?: number
+  args?: any
 }
 
 export type Handler = (

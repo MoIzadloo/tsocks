@@ -3,7 +3,11 @@ import Event from '../helper/event'
 import Connection, { EventTypes } from '../helper/connection'
 import * as handlers from './handlers/index'
 import { Handlers } from '../helper/handlers'
-import { HandlerResolve } from '../helper/handler'
+import {
+  handler as reqHandler,
+  Handler,
+  HandlerResolve,
+} from '../helper/handler'
 import Authenticator from './auth/authenticator'
 import Address from '../helper/address'
 import { AuthMethod } from '../helper/authMethod'
@@ -58,6 +62,16 @@ export class Client {
     this.event = new Event<EventTypes>()
   }
 
+  /**
+   * The connector method establishes a TCP connection to the proxy server
+   * @param port - Proxy server port
+   * @param host - Proxy server host
+   * @param cmd - Request command
+   * @param resolve - This function fires after the server response
+   * @param reject - This function fires after the server response if any error occurs
+   * @param version - SOCKS version
+   * @param userId - UserId for identification in SOCKS4
+   */
   private connector(
     port: number,
     host: string,
@@ -92,6 +106,43 @@ export class Client {
     return connection
   }
 
+  /**
+   * Sends a bind request
+   * @param port - Target port
+   * @param host - Target host address
+   * @param version - Server protocol version
+   * @returns void
+   */
+  bind(port: number, host: string, version?: 4 | 5, userId?: string) {
+    return new Promise<HandlerResolve>((resolve, reject) => {
+      const connection = this.connector(
+        port,
+        host,
+        COMMANDS.bind,
+        resolve,
+        reject,
+        version,
+        userId
+      )
+      if (connection?.request?.ver === 5) {
+        const authenticator = new Authenticator(connection)
+        authenticator.authenticate()
+      } else if (connection?.request?.ver === 4) {
+        if (connection?.request?.addr?.type === 'domain') {
+          reject('The Address type is not supported')
+        }
+        connection.handlers.req.bind(connection)
+      }
+    })
+  }
+
+  /**
+   * Sends an associate request
+   * @param port - Target port
+   * @param host - Target host address
+   * @param version - Server protocol version
+   * @returns void
+   */
   associate(port: number, host: string, version?: 4 | 5) {
     return new Promise<HandlerResolve>((resolve, reject) => {
       if (version === 5 || (!version && this.version === 5)) {
@@ -112,7 +163,7 @@ export class Client {
   }
 
   /**
-   * Connect to the target host trough SOCKS server
+   * Sends a connect request
    * @param port - Target port
    * @param host - Target host address
    * @param version - Server protocol version
@@ -149,6 +200,17 @@ export class Client {
    */
   public useAuth(handler: AuthMethod): Client {
     this.handlers.auth.push(handler)
+    return this
+  }
+
+  /**
+   * Get the handler function, and update this.handlers.req
+   * @param cmd - Specify handler type (connect | associate | bind)
+   * @param handler - Emitted when new request appears
+   * @returns Server
+   */
+  public useReq(cmd: keyof Handlers['req'], handler: Handler): Client {
+    this.handlers.req[cmd] = reqHandler(handler)
     return this
   }
 }

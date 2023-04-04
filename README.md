@@ -183,6 +183,45 @@ server.useReq('associate', (info, socket) => {
 server.listen(port, host)
 ```
 
+### Bind (TCP Relay)
+
+When the bind command is sent to a SOCKS proxy server v4|v5, the proxy server starts to listen on a new TCP port
+and sends the relay information back to the client. When another remote client connects to the proxy server on this port
+the SOCKS proxy sends a notification that an incoming connection has been accepted to the initial client and
+a full duplex stream is now established to the initial client and the client that connected to that special port.
+according to the SOCKS RFC, only one inbound connection is allowed per bind request.
+you can easily change my implementation of the bind command with your implementation or even deactivate it with the help of the useReq hook
+and inform the client with a command not supported reply.
+
+```typescript
+import { createServer, Reply } from 'tsocks'
+
+const host = '127.0.0.1'
+const port = 1080
+
+const server = createServer({
+  socks4: true,
+  socks5: true,
+})
+
+server.useReq('bind', (info, socket) => {
+  const host = info.address.host
+  const port = info.address.port // Port number
+  const type = info.address.type // ipv4 | ipv6 | domain
+  const version = info.version // SOCKS version
+  // You can implement the rest how ever you want or reject the request
+  // With the proper reply code as blow
+  // Remember the response should be decided by the version
+  if (version === 5) {
+    const reply = new Reply(version, 0x07, info.address)
+  } else {
+    const reply = new Reply(version, 0x5b, info.address)
+  }
+})
+
+server.listen(port, host)
+```
+
 ### SOCKS Adaptor
 
 You may want to use the SOCKS protocol to handle incoming network traffic.
@@ -427,6 +466,61 @@ try {
 
   info.socket.on('data', (data) => {
     console.log(data)
+  })
+} catch (err) {
+  console.log(err)
+}
+```
+
+### Bind (TCP Relay)
+
+When the bind command is sent to a SOCKS proxy server v4|v5, the proxy server starts to listen on a new TCP port
+and sends the relay information back to the client. When another remote client connects to the proxy server on this port
+the SOCKS proxy sends a notification that an incoming connection has been accepted to the initial client and
+a full duplex stream is now established to the initial client and the client that connected to that special port.
+according to the SOCKS RFC, only one inbound connection is allowed per bind request.
+
+```typescript
+import { createServer, connect, Reply } from 'tsocks'
+import * as net from 'net'
+
+const host = '127.0.0.1'
+const port = 1080
+// v5 or v4
+const version = 5
+
+// Create simple socks server
+const server = createServer()
+server.listen(port, host)
+
+try {
+  // Send a bind request
+  const info = await connect(port, host, version).bind(0, '0.0.0.0')
+  const remote = net.connect(info.address.port, info.address.host)
+  const states = ['information', 'relay']
+  let state = 0
+  console.log(info.address)
+  // The relays Address and port
+  // host: "143.123.35.425",
+  // port: 3342,
+  // type: "ipv4",
+  info.socket.on('data', (data) => {
+    switch (states[state]) {
+      case states[1]:
+        console.log(data.toString())
+        remote.destroy()
+        info.socket.destroy()
+        break
+      default:
+        const reply = Reply.from(data)
+        console.log(reply.addr)
+        // The remote address of the client that connected to the SOCKS proxy
+        //host: "122.153.15.225",
+        //port: 4562,
+        //type: "ipv4",
+        remote.write(Buffer.from('Hello'))
+        state++
+    }
   })
 } catch (err) {
   console.log(err)

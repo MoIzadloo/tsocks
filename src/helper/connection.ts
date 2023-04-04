@@ -68,6 +68,9 @@ class Connection {
     socks4: true,
   }
 
+  /**
+   * Clients Request
+   */
   request?: Request
 
   constructor(
@@ -111,6 +114,11 @@ class Connection {
     this.socket.write(writable.toBuffer())
   }
 
+  /**
+   * Read n bytes of data without the modification of the readable object data
+   * @param bytes - Number of bytes to be read from data
+   * @returns Buffer
+   */
   public cat(bytes?: number): Buffer {
     return this.readable.cat(bytes)
   }
