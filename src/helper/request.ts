@@ -4,10 +4,29 @@ import { ADDRESSTYPES, SOCKSVERSIONS } from './constants'
 import Writable from './writable'
 
 class Request {
+  /**
+   * Protocol version
+   */
   public ver: number
+
+  /**
+   * The request command
+   **/
   public cmd: number
+
+  /**
+   * Desired destination address
+   */
   public addr: Address
+
+  /**
+   * RESERVED
+   */
   public rsv: number
+
+  /**
+   * UserId for SOCKS4 identification
+   */
   public userId?: string
 
   constructor(
@@ -24,6 +43,9 @@ class Request {
     this.userId = userId
   }
 
+  /**
+   * Conversions the Request object to Buffer
+   */
   public toBuffer() {
     const writeable = new Writable()
     const buffAddr = this.addr.toBuffer()
@@ -44,6 +66,9 @@ class Request {
     return writeable.toBuffer()
   }
 
+  /**
+   * Conversions Buffer to the Request object
+   */
   public static from(data: Buffer) {
     const readable = new Readable(data)
     const ver = readable.read(1).readInt8()

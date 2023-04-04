@@ -21,8 +21,11 @@ export const bind = handler((info, socket, event) => {
   createRelay(relayPort, info, socket, event)
 })
 
+/**
+ * Generates a random port number between 1 and 32767
+ */
 const randPort = () => {
-  const max = 0
+  const max = 1
   const min = 32767
   const difference = max - min
   let rand = Math.random()
@@ -31,6 +34,13 @@ const randPort = () => {
   return rand
 }
 
+/**
+ * Check if the port number is free and create a new relay object
+ * @param port - Relays port number
+ * @param info - Clients request information
+ * @param socket - Clients socket
+ * @param event - Global event object
+ */
 const createRelay = (
   port: number,
   info: Info,

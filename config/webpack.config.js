@@ -30,6 +30,7 @@ module.exports = {
       os: false,
       dgram: false,
       buffer: false,
+      util: false,
     },
     extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },

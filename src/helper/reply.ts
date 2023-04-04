@@ -11,9 +11,24 @@ import { HandlerResolve } from './handler'
 import * as net from 'net'
 
 class Replay {
+  /**
+   * Protocol version
+   */
   public ver: number
+
+  /**
+   * Reply Code
+   */
   public rep: number
+
+  /**
+   * Desired destination address
+   */
   public addr: Address
+
+  /**
+   * RESERVED
+   */
   public rsv: number
 
   constructor(ver: number, rep: number, addr: Address, rsv = 0) {
@@ -23,6 +38,9 @@ class Replay {
     this.addr = addr
   }
 
+  /**
+   * Conversions the Replay object to Buffer
+   */
   public toBuffer() {
     const writeable = new Writable()
     const buffAddr = this.addr.toBuffer()
@@ -39,6 +57,9 @@ class Replay {
     return writeable.toBuffer()
   }
 
+  /**
+   * Conversions Buffer to the reply object
+   */
   public static from(data: Buffer) {
     const readable = new Readable(data)
     const ver = readable.read(1).readInt8()
@@ -71,6 +92,12 @@ class Replay {
     return new Replay(ver, rep, addr, rsv)
   }
 
+  /**
+   * Resolves the promise with the Relay object information
+   * @param socket - Clients socket
+   * @param resolve - returns information and socket to the client
+   * @param reject - returns errors to the client
+   */
   promiseHandler(
     socket: net.Socket,
     resolve: (value: PromiseLike<HandlerResolve> | HandlerResolve) => void,

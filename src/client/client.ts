@@ -62,6 +62,16 @@ export class Client {
     this.event = new Event<EventTypes>()
   }
 
+  /**
+   * The connector method establishes a TCP connection to the proxy server
+   * @param port - Proxy server port
+   * @param host - Proxy server host
+   * @param cmd - Request command
+   * @param resolve - This function fires after the server response
+   * @param reject - This function fires after the server response if any error occurs
+   * @param version - SOCKS version
+   * @param userId - UserId for identification in SOCKS4
+   */
   private connector(
     port: number,
     host: string,
@@ -96,6 +106,13 @@ export class Client {
     return connection
   }
 
+  /**
+   * Sends a bind request
+   * @param port - Target port
+   * @param host - Target host address
+   * @param version - Server protocol version
+   * @returns void
+   */
   bind(port: number, host: string, version?: 4 | 5, userId?: string) {
     return new Promise<HandlerResolve>((resolve, reject) => {
       const connection = this.connector(
@@ -119,6 +136,13 @@ export class Client {
     })
   }
 
+  /**
+   * Sends an associate request
+   * @param port - Target port
+   * @param host - Target host address
+   * @param version - Server protocol version
+   * @returns void
+   */
   associate(port: number, host: string, version?: 4 | 5) {
     return new Promise<HandlerResolve>((resolve, reject) => {
       if (version === 5 || (!version && this.version === 5)) {
@@ -139,7 +163,7 @@ export class Client {
   }
 
   /**
-   * Connect to the target host trough SOCKS server
+   * Sends a connect request
    * @param port - Target port
    * @param host - Target host address
    * @param version - Server protocol version
