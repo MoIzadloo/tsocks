@@ -3,6 +3,28 @@ import Request from '../../helper/request'
 import * as socks4 from './socks4'
 import { State } from '../../helper/state'
 import Authenticator from '../auth/authenticator'
+import { Http, None } from '../../obfs'
+
+export class ObfsState extends State {
+  private obfsMethods = [new None(), new Http()]
+
+  parse(): void {
+    let message = this.context.cat()
+    for (const method of this.obfsMethods) {
+      if (method.check(message)) {
+        message = method.DeObfuscate(message)
+        this.context.obfs = method
+        break
+      }
+    }
+  }
+
+  reply(): void {
+    this.context.transitionTo(new IdentifierState(this.context))
+    this.context.parse()
+    this.context.reply()
+  }
+}
 
 /**
  * The IdentifierState class identifies the version of the

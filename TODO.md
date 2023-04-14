@@ -2,11 +2,13 @@
 
 - [ ] Complete documentation
 - [ ] Complete test coverage
+- [ ] Add obfuscation support
 
 ### In Progress
 
 - [ ] Complete documentation
 - [ ] Complete test coverage
+- [ ] Add obfuscation support
 
 ### Done ✓
 

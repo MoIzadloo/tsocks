@@ -13,7 +13,7 @@ import Event from '../../helper/event'
  * Default implementation of bind
  * @returns void
  */
-export const bind = handler((info, socket, event) => {
+export const bind = handler((info, socket, obfs, event) => {
   let relayPort = info.address.port
   if (relayPort === 0) {
     relayPort = randPort()

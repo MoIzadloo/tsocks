@@ -8,7 +8,7 @@ import Address from '../../helper/address'
  * Default implementation of connect
  * @returns void
  */
-export const connect = handler((info, socket) => {
+export const connect = handler((info, socket, obfs) => {
   let version: number
   let reply: Reply
   if (info.version === SOCKSVERSIONS.socks5) {

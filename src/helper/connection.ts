@@ -1,12 +1,13 @@
 import * as net from 'net'
 import { State } from './state'
 import Readable from './readable'
-import { IdentifierState } from '../server/state/socks5'
+import { ObfsState } from '../server/state/socks5'
 import Writable from './writable'
 import { Handlers } from './handlers'
 import { HandlerResolve } from './handler'
 import Event from './event'
 import Request from './request'
+import Obfs from '../obfs/obfs'
 
 export type EventTypes = {
   data: (data: Buffer) => void
@@ -38,7 +39,7 @@ class Connection {
   /**
    * Current state
    */
-  private state: State = new IdentifierState(this)
+  private state: State = new ObfsState(this)
 
   /**
    * Connection socket
@@ -67,6 +68,8 @@ class Connection {
     socks5: true,
     socks4: true,
   }
+
+  public obfs?: Obfs
 
   /**
    * Clients Request

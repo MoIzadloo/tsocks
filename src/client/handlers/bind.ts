@@ -7,7 +7,7 @@ import Reply from '../../helper/reply'
  * Handle bind request
  * @returns void
  */
-export const bind = handler((info, socket, event, resolve, reject) => {
+export const bind = handler((info, socket, obfs, event, resolve, reject) => {
   const request = new Request(
     info.version,
     COMMANDS.bind,
@@ -18,8 +18,8 @@ export const bind = handler((info, socket, event, resolve, reject) => {
   socket.write(request.toBuffer())
   socket.on('data', (data) => {
     const reply = Reply.from(data)
-    if (resolve && reject) {
-      reply.promiseHandler(socket, resolve, reject)
+    if (resolve && reject && obfs) {
+      reply.promiseHandler(socket, obfs, resolve, reject)
     }
     socket.removeAllListeners('data')
   })

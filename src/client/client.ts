@@ -13,6 +13,9 @@ import Address from '../helper/address'
 import { AuthMethod } from '../helper/authMethod'
 import { COMMANDS } from '../helper/constants'
 import Request from '../helper/request'
+import Obfs from '../obfs/obfs'
+import { None } from '../obfs/none'
+import obfs from '../obfs/obfs'
 
 /**
  *  The Client class is responsible for creating a TCP socket connection,
@@ -48,6 +51,8 @@ export class Client {
    * userId for identification in v4
    */
   private readonly userId?: string
+
+  private obfs: Obfs = new None()
 
   constructor(port: number, host: string, version: 4 | 5, userId?: string) {
     this.host = host
@@ -99,7 +104,7 @@ export class Client {
     connection.request = new Request(ver, cmd, address, 0, id)
     connection.resolve = resolve
     connection.reject = reject
-
+    connection.obfs = this.obfs
     connection.event.subscribeOnce('error', (err) => {
       reject(err.message)
     })
