@@ -1,12 +1,28 @@
-import Obfs from './obfs'
+import ObfsMethod from './obfs'
+import Connection from '../helper/connection'
+import { encryptionMethods } from '../helper/constants'
+import { obfsHttpMethods } from '../helper/constants'
 
-export class Http extends Obfs {
+export class Http extends ObfsMethod {
   public path
-  name = 'HTTP'
-  constructor(path = '') {
+  public name = 'HTTP'
+  public encryption: string
+  public method: string
+  constructor(
+    path = '',
+    encryption = encryptionMethods.none,
+    method = obfsHttpMethods.post
+  ) {
     super()
     this.path = path
+    this.encryption = encryption
+    this.method = method
   }
+
+  handshake() {
+    console.log('ran')
+  }
+
   check(message: Buffer) {
     const regex = new RegExp(
       `^(?<method>GET|POST|PUT|DELETE|HEAD|OPTIONS).\\/(?<path>[^HTTP]*)HTTP\\/(?<version>.*)`
@@ -27,7 +43,7 @@ export class Http extends Obfs {
     return true
   }
 
-  DeObfuscate(message: Buffer): Buffer {
+  deObfuscate(message: Buffer): Buffer {
     return message
   }
 

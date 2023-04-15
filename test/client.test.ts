@@ -3,6 +3,7 @@ import {
   connect,
   clientAuthMethods,
   serverAuthMethods,
+  obfsMethods,
   createUdpFrame,
   parseUdpFrame,
 } from '../src'
@@ -195,6 +196,43 @@ describe('client socks4 (connect | associate | bind)', () => {
               remote.write(Buffer.from('Hello'))
               state++
           }
+        })
+      })
+      .catch((reason) => {
+        expect(true).toBe(false)
+      })
+  })
+
+  afterAll((done) => {
+    server.close()
+    done()
+  })
+})
+
+describe('client socks4 (connect | associate | bind)', () => {
+  const server = createServer()
+  beforeAll((done) => {
+    server.listen(serverPort, serverHost)
+    done()
+  })
+
+  test('connect to google.com', (done) => {
+    connect(serverPort, serverHost, 4)
+      .useObfs(new obfsMethods.None())
+      .connect(httpPort, '142.251.1.101')
+      .then((info) => {
+        info.socket.write(
+          Buffer.from(
+            'GET / HTTP/1.1\r\n' +
+              'Host: www.google.com:80\r\n' +
+              'Connection: close\r\n' +
+              '\r\n'
+          )
+        )
+        info.socket.once('data', (data) => {
+          info.socket.destroy()
+          expect(data.toString()).toMatch(/20[01] OK/)
+          done()
         })
       })
       .catch((reason) => {

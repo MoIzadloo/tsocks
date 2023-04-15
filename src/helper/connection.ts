@@ -7,7 +7,8 @@ import { Handlers } from './handlers'
 import { HandlerResolve } from './handler'
 import Event from './event'
 import Request from './request'
-import Obfs from '../obfs/obfs'
+import ObfsMethod from '../obfs/obfs'
+import { None } from '../obfs'
 
 export type EventTypes = {
   data: (data: Buffer) => void
@@ -69,7 +70,7 @@ class Connection {
     socks4: true,
   }
 
-  public obfs?: Obfs
+  public obfs: ObfsMethod = new None()
 
   /**
    * Clients Request

@@ -9,10 +9,9 @@ export class ObfsState extends State {
   private obfsMethods = [new None(), new Http()]
 
   parse(): void {
-    let message = this.context.cat()
+    const message = this.context.cat()
     for (const method of this.obfsMethods) {
       if (method.check(message)) {
-        message = method.DeObfuscate(message)
         this.context.obfs = method
         break
       }
