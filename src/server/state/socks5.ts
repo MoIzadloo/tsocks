@@ -3,14 +3,17 @@ import Request from '../../helper/request'
 import * as socks4 from './socks4'
 import { State } from '../../helper/state'
 import Authenticator from '../auth/authenticator'
-import { Http, None } from '../../obfs'
+import { http, none } from '../../obfs'
+import Readable from '../../helper/readable'
+import ObfsMethod from '../../obfs/obfs'
 
 export class ObfsState extends State {
-  private obfsMethods = [new None(), new Http()]
+  private obfsMethods = [none(), http()]
 
   parse(): void {
     const message = this.context.cat()
-    for (const method of this.obfsMethods) {
+    for (const m of this.obfsMethods) {
+      const method = m(this.context, ObfsMethod.SERVER)
       if (method.check(message)) {
         this.context.obfs = method
         break
@@ -19,6 +22,9 @@ export class ObfsState extends State {
   }
 
   reply(): void {
+    this.context.readable = new Readable(
+      this.context.obfs.deObfuscate(this.context.read())
+    )
     this.context.transitionTo(new IdentifierState(this.context))
     this.context.parse()
     this.context.reply()

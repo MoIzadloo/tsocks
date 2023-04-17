@@ -5,7 +5,6 @@ import { Handlers } from '../helper/handlers'
 import { AuthMethod } from '../helper/authMethod'
 import { connect, associate, bind } from './handlers'
 import Event from '../helper/event'
-import { None } from '../obfs'
 
 type ConnectionListener = ((socket: net.Socket) => void) | undefined
 

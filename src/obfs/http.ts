@@ -1,26 +1,27 @@
 import ObfsMethod from './obfs'
 import Connection from '../helper/connection'
-import { encryptionMethods } from '../helper/constants'
-import { obfsHttpMethods } from '../helper/constants'
+import { encryptionMethods, obfsHttpMethods } from '../helper/constants'
 
-export class Http extends ObfsMethod {
+class Http extends ObfsMethod {
   public path
   public name = 'HTTP'
   public encryption: string
   public method: string
   constructor(
-    path = '',
-    encryption = encryptionMethods.none,
-    method = obfsHttpMethods.post
+    connection: Connection,
+    type: typeof ObfsMethod.CLIENT | typeof ObfsMethod.SERVER,
+    path: string,
+    encryption: string,
+    method: string
   ) {
-    super()
+    super(connection, type)
     this.path = path
     this.encryption = encryption
     this.method = method
   }
 
-  handshake() {
-    console.log('ran')
+  handshake(callback: () => void): void {
+    callback()
   }
 
   check(message: Buffer) {
@@ -35,19 +36,47 @@ export class Http extends ObfsMethod {
       }
 
       // The result can be accessed through the `m`-variable.
-      m.forEach((match, groupIndex) => {
-        console.log(match)
-        console.log(`Found match, group ${groupIndex}: ${match}`)
-      })
+      if (m[1] !== this.method || m[2] !== this.path || m[3] !== '1.1') {
+        return false
+      }
     }
     return true
   }
 
   deObfuscate(message: Buffer): Buffer {
+    const http = message.toString()
+    if (this.type === ObfsMethod.SERVER) {
+      const parts = http.split('\r\n')
+      console.log(parts)
+    }
     return message
   }
 
   obfuscate(message: Buffer): Buffer {
-    return message
+    let http = ''
+    if (this.type === ObfsMethod.CLIENT) {
+      http += `POST ${this.path} HTTP/1.1\r\n`
+      http += `Host: ${this.connection.socket.remoteAddress}:${this.connection.socket.remotePort}\r\n`
+      http += `Connection: keep-alive\r\n`
+      http += `content-length: ${message.length}\r\n`
+      http += message
+      http += `\r\n\r\n`
+    }
+    return Buffer.from(http)
   }
 }
+
+export const http =
+  (
+    path = '',
+    encryption = encryptionMethods.none,
+    method = obfsHttpMethods.post
+  ) =>
+  (
+    connection: Connection,
+    type:
+      | typeof ObfsMethod.CLIENT
+      | typeof ObfsMethod.SERVER = ObfsMethod.CLIENT
+  ) => {
+    return new Http(connection, type, path, encryption, method)
+  }

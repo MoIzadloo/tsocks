@@ -13,6 +13,7 @@ import Address from '../src/helper/address'
 import * as dns from 'dns'
 import net from 'net'
 import Readable from '../src/helper/readable'
+import obfs from '../src/obfs/obfs'
 
 jest.setTimeout(20000)
 const serverPort = 3369
@@ -209,16 +210,16 @@ describe('client socks4 (connect | associate | bind)', () => {
   })
 })
 
-describe('client socks4 (connect | associate | bind)', () => {
+describe('client useObfs', () => {
   const server = createServer()
   beforeAll((done) => {
     server.listen(serverPort, serverHost)
     done()
   })
 
-  test('connect to google.com', (done) => {
+  test('useObfs None', (done) => {
     connect(serverPort, serverHost, 4)
-      .useObfs(new obfsMethods.None())
+      .useObfs(obfsMethods.none())
       .connect(httpPort, '142.251.1.101')
       .then((info) => {
         info.socket.write(
@@ -239,6 +240,30 @@ describe('client socks4 (connect | associate | bind)', () => {
         expect(true).toBe(false)
       })
   })
+
+  // test('useObfs HTTP with no cipher', (done) => {
+  //   connect(serverPort, serverHost, 4)
+  //     .useObfs(obfsMethods.http())
+  //     .connect(httpPort, '142.251.1.101')
+  //     .then((info) => {
+  //       info.socket.write(
+  //         Buffer.from(
+  //           'GET / HTTP/1.1\r\n' +
+  //             'Host: www.google.com:80\r\n' +
+  //             'Connection: close\r\n' +
+  //             '\r\n'
+  //         )
+  //       )
+  //       info.socket.once('data', (data) => {
+  //         info.socket.destroy()
+  //         expect(data.toString()).toMatch(/20[01] OK/)
+  //         done()
+  //       })
+  //     })
+  //     .catch((reason) => {
+  //       expect(true).toBe(false)
+  //     })
+  // })
 
   afterAll((done) => {
     server.close()

@@ -1,8 +1,7 @@
 import ObfsMethod from './obfs'
-import Authenticator from '../client/auth/authenticator'
 import Connection from '../helper/connection'
 
-export class None extends ObfsMethod {
+class None extends ObfsMethod {
   name = 'None'
 
   check(message: Buffer): boolean {
@@ -17,10 +16,18 @@ export class None extends ObfsMethod {
     return message
   }
 
-  handshake(connection: Connection): void {
-    if (connection?.request?.ver === 5) {
-      const authenticator = new Authenticator(connection)
-      authenticator.authenticate()
-    }
+  handshake(callback: () => void): void {
+    callback()
   }
 }
+
+export const none =
+  () =>
+  (
+    connection: Connection,
+    type:
+      | typeof ObfsMethod.CLIENT
+      | typeof ObfsMethod.SERVER = ObfsMethod.CLIENT
+  ) => {
+    return new None(connection, type)
+  }

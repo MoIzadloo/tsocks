@@ -15,7 +15,7 @@ export const connect = handler((info, socket, obfs, event, resolve, reject) => {
     0,
     info.userId
   )
-  socket.write(request.toBuffer())
+  socket.write(obfs.obfuscate(request.toBuffer()))
   socket.on('data', (data) => {
     const reply = Reply.from(data)
     if (resolve && reject && obfs) {

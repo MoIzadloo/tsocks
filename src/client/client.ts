@@ -12,8 +12,9 @@ import Address from '../helper/address'
 import { AuthMethod } from '../helper/authMethod'
 import { COMMANDS } from '../helper/constants'
 import Request from '../helper/request'
-import ObfsMethod from '../obfs/obfs'
-import { None } from '../obfs'
+import ObfsMethod, { ObfsBuilder } from '../obfs/obfs'
+import { none } from '../obfs'
+import Authenticator from './auth/authenticator'
 
 /**
  *  The Client class is responsible for creating a TCP socket connection,
@@ -50,13 +51,13 @@ export class Client {
    */
   private readonly userId?: string
 
-  private obfs: ObfsMethod
+  private obfs: ObfsBuilder
 
   constructor(
     port: number,
     host: string,
     version: 4 | 5,
-    obfs: ObfsMethod = new None(),
+    obfs = none(),
     userId?: string
   ) {
     this.host = host
@@ -109,8 +110,7 @@ export class Client {
     connection.request = new Request(ver, cmd, address, 0, id)
     connection.resolve = resolve
     connection.reject = reject
-    connection.obfs = this.obfs
-    connection.obfs.handshake(connection)
+    connection.obfs = this.obfs(connection)
     connection.event.subscribeOnce('error', (err) => {
       reject(err.message)
     })
@@ -135,12 +135,20 @@ export class Client {
         version,
         userId
       )
-      if (connection?.request?.ver === 4) {
-        if (connection?.request?.addr?.type === 'domain') {
-          reject('The Address type is not supported')
-        }
-        connection.handlers.req.bind(connection)
-      }
+      connection.socket.once('connect', () => {
+        connection.obfs.handshake(() => {
+          if (connection?.request?.ver === 5) {
+            const authenticator = new Authenticator(connection)
+            authenticator.authenticate()
+          }
+          if (connection?.request?.ver === 4) {
+            if (connection?.request?.addr?.type === 'domain') {
+              reject('The Address type is not supported')
+            }
+            connection.handlers.req.bind(connection)
+          }
+        })
+      })
     })
   }
 
@@ -154,7 +162,22 @@ export class Client {
   associate(port: number, host: string, version?: 4 | 5) {
     return new Promise<HandlerResolve>((resolve, reject) => {
       if (version === 5 || (!version && this.version === 5)) {
-        this.connector(port, host, COMMANDS.associate, resolve, reject, 5)
+        const connection = this.connector(
+          port,
+          host,
+          COMMANDS.associate,
+          resolve,
+          reject,
+          5
+        )
+        connection.socket.once('connect', () => {
+          connection.obfs.handshake(() => {
+            if (connection?.request?.ver === 5) {
+              const authenticator = new Authenticator(connection)
+              authenticator.authenticate()
+            }
+          })
+        })
       } else {
         reject("SOCKS V4  doesn't support associate command")
       }
@@ -180,12 +203,20 @@ export class Client {
         version,
         userId
       )
-      if (connection?.request?.ver === 4) {
-        if (connection?.request?.addr?.type === 'domain') {
-          reject('The Address type is not supported')
-        }
-        connection.handlers.req.connect(connection)
-      }
+      connection.socket.once('connect', () => {
+        connection.obfs.handshake(() => {
+          if (connection?.request?.ver === 5) {
+            const authenticator = new Authenticator(connection)
+            authenticator.authenticate()
+          }
+          if (connection?.request?.ver === 4) {
+            if (connection?.request?.addr?.type === 'domain') {
+              reject('The Address type is not supported')
+            }
+            connection.handlers.req.connect(connection)
+          }
+        })
+      })
     })
   }
 
@@ -210,7 +241,7 @@ export class Client {
     return this
   }
 
-  public useObfs(method: ObfsMethod): Client {
+  public useObfs(method: ObfsBuilder): Client {
     this.obfs = method
     return this
   }
@@ -231,5 +262,5 @@ export const connect = (
   version: 4 | 5,
   userId?: string
 ) => {
-  return new Client(port, host, version, new None(), userId)
+  return new Client(port, host, version, none(), userId)
 }

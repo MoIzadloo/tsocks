@@ -2,6 +2,7 @@
  * The Readable class turns a Buffer into a readable object,
  * so it could be read piece by pieces
  */
+
 class Readable {
   /**
    * Input Buffer

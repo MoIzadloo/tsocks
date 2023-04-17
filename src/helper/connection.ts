@@ -7,8 +7,8 @@ import { Handlers } from './handlers'
 import { HandlerResolve } from './handler'
 import Event from './event'
 import Request from './request'
+import { none } from '../obfs'
 import ObfsMethod from '../obfs/obfs'
-import { None } from '../obfs'
 
 export type EventTypes = {
   data: (data: Buffer) => void
@@ -70,7 +70,7 @@ class Connection {
     socks4: true,
   }
 
-  public obfs: ObfsMethod = new None()
+  public obfs: ObfsMethod
 
   /**
    * Clients Request
@@ -83,6 +83,7 @@ class Connection {
     handlers: Handlers,
     options?: Options
   ) {
+    this.obfs = none()(this)
     this.handlers = handlers
     this.socket = socket
     this.event = event
@@ -91,7 +92,7 @@ class Connection {
     }
     socket.on('data', (data) => {
       try {
-        this.readable = new Readable(data)
+        this.readable = new Readable(this.obfs.deObfuscate(data))
         this.parse()
         this.reply()
       } catch (err) {
