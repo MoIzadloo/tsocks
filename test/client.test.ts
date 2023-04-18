@@ -241,29 +241,68 @@ describe('client useObfs', () => {
       })
   })
 
-  // test('useObfs HTTP with no cipher', (done) => {
-  //   connect(serverPort, serverHost, 4)
-  //     .useObfs(obfsMethods.http())
-  //     .connect(httpPort, '142.251.1.101')
-  //     .then((info) => {
-  //       info.socket.write(
-  //         Buffer.from(
-  //           'GET / HTTP/1.1\r\n' +
-  //             'Host: www.google.com:80\r\n' +
-  //             'Connection: close\r\n' +
-  //             '\r\n'
-  //         )
-  //       )
-  //       info.socket.once('data', (data) => {
-  //         info.socket.destroy()
-  //         expect(data.toString()).toMatch(/20[01] OK/)
-  //         done()
-  //       })
-  //     })
-  //     .catch((reason) => {
-  //       expect(true).toBe(false)
-  //     })
-  // })
+  test('useObfs HTTP with no cipher connect', (done) => {
+    connect(serverPort, serverHost, 4)
+      .useObfs(obfsMethods.http())
+      .connect(httpPort, '142.251.1.101')
+      .then((info) => {
+        info.socket.write(
+          info.obfs.obfuscate(
+            Buffer.from(
+              'GET / HTTP/1.1\r\n' +
+                'Host: www.google.com:80\r\n' +
+                'Connection: close\r\n' +
+                '\r\n'
+            )
+          )
+        )
+        info.socket.once('data', (data) => {
+          info.socket.destroy()
+          expect(info.obfs.deObfuscate(data).toString()).toMatch(/20[01] OK/)
+          done()
+        })
+      })
+      .catch((reason) => {
+        expect(true).toBe(false)
+      })
+  })
+
+  test('bind', (done) => {
+    connect(serverPort, serverHost, 4)
+      .useObfs(obfsMethods.http())
+      .bind(0, '0.0.0.0')
+      .then((info) => {
+        const remote = net.connect(info.address.port, info.address.host)
+        const states = ['information', 'relay']
+        let readable, port, host, relayAddr
+        let state = 0
+        info.socket.on('data', (data) => {
+          switch (states[state]) {
+            case states[1]:
+              expect(info.obfs.deObfuscate(data).toString()).toBe('Hello')
+              remote.destroy()
+              info.socket.destroy()
+              done()
+              break
+            default:
+              readable = new Readable(info.obfs.deObfuscate(data))
+              readable.read(3)
+              port = readable.read(2)
+              host = readable.read(4)
+              relayAddr = Address.buffToAddrFactory(
+                port,
+                host,
+                ADDRESSTYPES.ipv4
+              )
+              remote.write(Buffer.from('Hello'))
+              state++
+          }
+        })
+      })
+      .catch((reason) => {
+        expect(true).toBe(false)
+      })
+  })
 
   afterAll((done) => {
     server.close()

@@ -155,9 +155,17 @@ export const obfsHttpMethods: ObfsHttpMethods = Object.freeze({
 })
 
 interface EncryptionMethods {
-  none: 'None'
+  none: string
 }
 
 export const encryptionMethods: EncryptionMethods = {
-  none: 'None',
+  none: 'none',
+}
+
+interface CompressionMethods {
+  none: string
+}
+
+export const compressionMethods: CompressionMethods = {
+  none: 'none',
 }

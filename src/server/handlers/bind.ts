@@ -8,6 +8,7 @@ import * as tcpPortUsed from 'tcp-port-used'
 import * as net from 'net'
 import { EventTypes } from '../../index'
 import Event from '../../helper/event'
+import ObfsMethod from '../../obfs/obfs'
 
 /**
  * Default implementation of bind
@@ -18,7 +19,7 @@ export const bind = handler((info, socket, obfs, event) => {
   if (relayPort === 0) {
     relayPort = randPort()
   }
-  createRelay(relayPort, info, socket, event)
+  createRelay(relayPort, info, socket, obfs, event)
 })
 
 /**
@@ -45,6 +46,7 @@ const createRelay = (
   port: number,
   info: Info,
   socket: net.Socket,
+  obfs: ObfsMethod,
   event?: Event<EventTypes>
 ) => {
   let version: number
@@ -58,13 +60,13 @@ const createRelay = (
     .check(port)
     .then((inUse) => {
       if (inUse) {
-        createRelay(randPort(), info, socket)
+        createRelay(randPort(), info, socket, obfs)
       } else {
         const relayHost =
           info.address.host === '127.0.0.1'
             ? '127.0.0.1'
             : ip.address('private')
-        const relay = new TcpRelay(port, info, socket)
+        const relay = new TcpRelay(port, info, socket, obfs)
         event?.subscribeOnce('terminate', () => {
           relay.close()
         })
@@ -74,7 +76,7 @@ const createRelay = (
         } else if (info.version === SOCKSVERSIONS.socks4) {
           reply = new Reply(version, SOCKS4REPLY.granted.code, relayAddress)
         }
-        socket.write(reply.toBuffer())
+        socket.write(obfs.obfuscate(reply.toBuffer()))
       }
     })
     .catch((err) => {
@@ -90,6 +92,6 @@ const createRelay = (
             )
           }
       }
-      socket.write(reply.toBuffer())
+      socket.write(obfs.obfuscate(reply.toBuffer()))
     })
 }

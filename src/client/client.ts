@@ -12,7 +12,7 @@ import Address from '../helper/address'
 import { AuthMethod } from '../helper/authMethod'
 import { COMMANDS } from '../helper/constants'
 import Request from '../helper/request'
-import ObfsMethod, { ObfsBuilder } from '../obfs/obfs'
+import { ObfsBuilder } from '../obfs/obfs'
 import { none } from '../obfs'
 import Authenticator from './auth/authenticator'
 
@@ -51,13 +51,13 @@ export class Client {
    */
   private readonly userId?: string
 
-  private obfs: ObfsBuilder
+  public obfs: ObfsBuilder
 
   constructor(
     port: number,
     host: string,
     version: 4 | 5,
-    obfs = none(),
+    obfs: ObfsBuilder,
     userId?: string
   ) {
     this.host = host

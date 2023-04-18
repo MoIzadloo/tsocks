@@ -27,9 +27,13 @@ export const connect = handler((info, socket, obfs) => {
       } else if (info.version === SOCKSVERSIONS.socks4) {
         reply = new Reply(version, SOCKS4REPLY.granted.code, address)
       }
-      socket.write(reply.toBuffer())
-      socket.pipe(connection)
-      connection.pipe(socket)
+      socket.write(obfs.obfuscate(reply.toBuffer()))
+      socket.on('data', (data) => {
+        connection.write(obfs.deObfuscate(data))
+      })
+      connection.on('data', (data) => {
+        socket.write(obfs.obfuscate(data))
+      })
     }
   })
   connection.on('error', (err) => {

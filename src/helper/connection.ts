@@ -116,7 +116,7 @@ class Connection {
    * @returns void
    */
   public write(writable: Writable): void {
-    this.socket.write(writable.toBuffer())
+    this.socket.write(this.obfs.obfuscate(writable.toBuffer()))
   }
 
   /**

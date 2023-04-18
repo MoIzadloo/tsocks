@@ -15,9 +15,9 @@ export const bind = handler((info, socket, obfs, event, resolve, reject) => {
     0,
     info.userId
   )
-  socket.write(request.toBuffer())
+  socket.write(obfs.obfuscate(request.toBuffer()))
   socket.on('data', (data) => {
-    const reply = Reply.from(data)
+    const reply = Reply.from(obfs.deObfuscate(data))
     if (resolve && reject && obfs) {
       reply.promiseHandler(socket, obfs, resolve, reject)
     }
