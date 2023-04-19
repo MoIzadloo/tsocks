@@ -13,7 +13,6 @@ import Address from '../src/helper/address'
 import * as dns from 'dns'
 import net from 'net'
 import Readable from '../src/helper/readable'
-import obfs from '../src/obfs/obfs'
 
 jest.setTimeout(20000)
 const serverPort = 3369
@@ -267,8 +266,8 @@ describe('client useObfs', () => {
       })
   })
 
-  test('bind', (done) => {
-    connect(serverPort, serverHost, 4)
+  test('useObfs HTTP with no cipher bind', (done) => {
+    connect(serverPort, serverHost, 5)
       .useObfs(obfsMethods.http())
       .bind(0, '0.0.0.0')
       .then((info) => {

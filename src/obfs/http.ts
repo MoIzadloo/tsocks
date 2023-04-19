@@ -37,11 +37,11 @@ class Http extends ObfsMethod {
     )
     const m = regex.exec(message.toString())
     if (m) {
-      if (m[1] !== this.method || m[2] !== this.path || m[3] !== '1.1') {
-        return false
+      if (m[1] === this.method || m[2] === this.path || m[3] === '1.1') {
+        return true
       }
     }
-    return true
+    return false
   }
 
   deObfuscate(message: Buffer): Buffer {

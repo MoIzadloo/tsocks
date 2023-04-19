@@ -14,7 +14,7 @@ export const connect = handler((info, socket, obfs) => {
   if (info.version === SOCKSVERSIONS.socks5) {
     version = SOCKSVERSIONS.socks5
   } else {
-    version = 1
+    version = 0
   }
   const connection = net.connect(info.address.port, info.address.host, () => {
     if (connection.remotePort && connection.remoteAddress) {
@@ -49,6 +49,6 @@ export const connect = handler((info, socket, obfs) => {
           )
         }
     }
-    socket.write(reply.toBuffer())
+    socket.write(obfs.obfuscate(reply.toBuffer()))
   })
 })

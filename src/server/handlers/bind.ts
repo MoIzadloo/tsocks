@@ -54,7 +54,7 @@ const createRelay = (
   if (info.version === SOCKSVERSIONS.socks5) {
     version = SOCKSVERSIONS.socks5
   } else {
-    version = 1
+    version = 0
   }
   tcpPortUsed
     .check(port)
