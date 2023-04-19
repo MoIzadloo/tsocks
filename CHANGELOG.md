@@ -1,3 +1,17 @@
+# [v3.3.0](https://github.com/MoIzadloo/tsocks/compare/v3.2.3...v3.3.0) (2023-04-19)
+
+## ✨ New Features
+- [`63f89d6`](https://github.com/MoIzadloo/tsocks/commit/63f89d6)  feat: Add obfuscation support 
+- [`238d739`](https://github.com/MoIzadloo/tsocks/commit/238d739)  feat: Http Obfuscation handshake in progress 
+- [`5a58b88`](https://github.com/MoIzadloo/tsocks/commit/5a58b88)  feat: Http Obfuscation add basic parts 
+- [`87e858c`](https://github.com/MoIzadloo/tsocks/commit/87e858c)  feat: Http Obfuscation post simple complete 
+- [`6660b34`](https://github.com/MoIzadloo/tsocks/commit/6660b34)  feat: Add server useObfs hook 
+- [`c2526d2`](https://github.com/MoIzadloo/tsocks/commit/c2526d2)  feat: Add obfuscation support 
+
+## 🐛 Bug Fixes
+- [`88fcdde`](https://github.com/MoIzadloo/tsocks/commit/88fcdde)  fix: SOCKS4 reply version fixed 
+- [`a27e5a9`](https://github.com/MoIzadloo/tsocks/commit/a27e5a9)  fix: Fix a few bugs
+
 # [v3.2.3](https://github.com/MoIzadloo/tsocks/compare/v3.2.2...v3.2.3) (2023-04-04)
 
 # [v3.2.2](https://github.com/MoIzadloo/tsocks/compare/v3.2.1...v3.2.2) (2023-04-04)
