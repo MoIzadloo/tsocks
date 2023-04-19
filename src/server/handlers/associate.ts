@@ -9,7 +9,7 @@ import Reply from '../../helper/reply'
  * Default implementation of associate
  * @returns void
  */
-export const associate = handler((info, socket, event) => {
+export const associate = handler((info, socket, obfs, event) => {
   const relayPort = socket.address()
   let reply: Reply
   if ('port' in relayPort) {

@@ -8,13 +8,13 @@ import Address from '../../helper/address'
  * Default implementation of connect
  * @returns void
  */
-export const connect = handler((info, socket) => {
+export const connect = handler((info, socket, obfs) => {
   let version: number
   let reply: Reply
   if (info.version === SOCKSVERSIONS.socks5) {
     version = SOCKSVERSIONS.socks5
   } else {
-    version = 1
+    version = 0
   }
   const connection = net.connect(info.address.port, info.address.host, () => {
     if (connection.remotePort && connection.remoteAddress) {
@@ -27,9 +27,13 @@ export const connect = handler((info, socket) => {
       } else if (info.version === SOCKSVERSIONS.socks4) {
         reply = new Reply(version, SOCKS4REPLY.granted.code, address)
       }
-      socket.write(reply.toBuffer())
-      socket.pipe(connection)
-      connection.pipe(socket)
+      socket.write(obfs.obfuscate(reply.toBuffer()))
+      socket.on('data', (data) => {
+        connection.write(obfs.deObfuscate(data))
+      })
+      connection.on('data', (data) => {
+        socket.write(obfs.obfuscate(data))
+      })
     }
   })
   connection.on('error', (err) => {
@@ -45,6 +49,6 @@ export const connect = handler((info, socket) => {
           )
         }
     }
-    socket.write(reply.toBuffer())
+    socket.write(obfs.obfuscate(reply.toBuffer()))
   })
 })

@@ -19,7 +19,7 @@ class Address {
     /**
      * Regular expression for domain
      */
-    const domainRegex = '^[a-zA-Z0-9-\\_]+\\.[a-zA-Z]+?$'
+    const domainRegex = '([a-z0-9|-]+\\.)*[a-z0-9|-]+\\.[a-z]+'
 
     /**
      * Port

@@ -5,6 +5,7 @@ import { Handlers } from '../helper/handlers'
 import { AuthMethod } from '../helper/authMethod'
 import { connect, associate, bind } from './handlers'
 import Event from '../helper/event'
+import { ObfsBuilder } from '../obfs/obfs'
 
 type ConnectionListener = ((socket: net.Socket) => void) | undefined
 
@@ -101,6 +102,16 @@ export class Server {
    */
   public useIdent(handler: (userId: string) => boolean): Server {
     this.handlers.userId = handler
+    return this
+  }
+
+  /**
+   * Get the handler function, and update this.handlers.userId
+   * @param handler - Emitted when new request appears
+   * @returns Server
+   */
+  public useObfs(handler: ObfsBuilder): Server {
+    this.handlers.obfs.push(handler)
     return this
   }
 

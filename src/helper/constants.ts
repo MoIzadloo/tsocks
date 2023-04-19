@@ -135,3 +135,37 @@ export const SOCKS4REPLY: Record<Socks4ReplyName, Reply> = Object.freeze({
     msg: 'request rejected because the client program and identity report different user-ids',
   },
 })
+
+interface ObfsMethods {
+  none: string
+  http: string
+}
+
+export const obfsMethods: ObfsMethods = Object.freeze({
+  none: 'None',
+  http: 'HTTP',
+})
+
+interface ObfsHttpMethods {
+  post: string
+}
+
+export const obfsHttpMethods: ObfsHttpMethods = Object.freeze({
+  post: 'POST',
+})
+
+interface EncryptionMethods {
+  none: string
+}
+
+export const encryptionMethods: EncryptionMethods = {
+  none: 'none',
+}
+
+interface CompressionMethods {
+  none: string
+}
+
+export const compressionMethods: CompressionMethods = {
+  none: 'none',
+}

@@ -3,6 +3,7 @@ import Reply from './reply'
 import { SOCKS5REPLY } from './constants'
 import { Info } from './handler'
 import Address from './address'
+import ObfsMethod from '../obfs/obfs'
 
 /**
  *  Starts listening on a new TCP port and the proxy relays
@@ -22,7 +23,7 @@ class TcpRelay {
    */
   public port: number
 
-  constructor(port: number, info: Info, socket: net.Socket) {
+  constructor(port: number, info: Info, socket: net.Socket, obfs: ObfsMethod) {
     this.port = port
     this.tcpRelay = net.createServer()
     this.tcpRelay.once('connection', (remoteSocket) => {
@@ -34,13 +35,17 @@ class TcpRelay {
           SOCKS5REPLY.succeeded.code,
           relayAddress
         )
-        socket.write(reply.toBuffer())
+        socket.write(obfs.obfuscate(reply.toBuffer()))
       }
       remoteSocket.on('close', () => {
         this.close()
       })
-      socket.pipe(remoteSocket)
-      remoteSocket.pipe(socket)
+      socket.on('data', (data) => {
+        remoteSocket.write(obfs.deObfuscate(data))
+      })
+      remoteSocket.on('data', (data) => {
+        socket.write(obfs.obfuscate(data))
+      })
     })
     this.tcpRelay.listen(this.port, '127.0.0.1')
   }
