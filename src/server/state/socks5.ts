@@ -11,6 +11,9 @@ export class ObfsState extends State {
   private obfsMethods = [none(), http()]
 
   parse(): void {
+    if (this.context.handlers.obfs.length > 0) {
+      this.obfsMethods = this.context.handlers.obfs
+    }
     const message = this.context.cat()
     for (const m of this.obfsMethods) {
       const method = m(this.context, ObfsMethod.SERVER)
