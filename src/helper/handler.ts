@@ -2,6 +2,7 @@ import Address from './address'
 import Connection, { EventTypes } from './connection'
 import * as net from 'net'
 import Event from './event'
+import Obfs from '../obfs/obfs'
 
 export interface Info {
   version: number
@@ -12,6 +13,7 @@ export interface Info {
 export interface HandlerResolve {
   socket: net.Socket
   address: Address
+  obfs: Obfs
   rsv?: number
   args?: any
 }
@@ -19,6 +21,7 @@ export interface HandlerResolve {
 export type Handler = (
   info: Info,
   socket: net.Socket,
+  obfs: Obfs,
   event?: Event<EventTypes>,
   resolve?: (value: PromiseLike<HandlerResolve> | HandlerResolve) => void,
   reject?: ((reason?: any) => void) | undefined
@@ -32,7 +35,7 @@ export type Handler = (
 export const handler =
   (callback: Handler) =>
   (connection: Connection): void => {
-    if (connection.request) {
+    if (connection.request && connection.obfs) {
       callback(
         {
           version: connection.request.ver,
@@ -40,6 +43,7 @@ export const handler =
           userId: connection.request.userId,
         },
         connection.socket,
+        connection.obfs,
         connection.event,
         connection.resolve,
         connection.reject

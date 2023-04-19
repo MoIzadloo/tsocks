@@ -1,12 +1,14 @@
 import * as net from 'net'
 import { State } from './state'
 import Readable from './readable'
-import { IdentifierState } from '../server/state/socks5'
+import { ObfsState } from '../server/state/socks5'
 import Writable from './writable'
 import { Handlers } from './handlers'
 import { HandlerResolve } from './handler'
 import Event from './event'
 import Request from './request'
+import { none } from '../obfs'
+import ObfsMethod from '../obfs/obfs'
 
 export type EventTypes = {
   data: (data: Buffer) => void
@@ -38,7 +40,7 @@ class Connection {
   /**
    * Current state
    */
-  private state: State = new IdentifierState(this)
+  private state: State = new ObfsState(this)
 
   /**
    * Connection socket
@@ -69,6 +71,11 @@ class Connection {
   }
 
   /**
+   * The obfuscation method
+   */
+  public obfs: ObfsMethod
+
+  /**
    * Clients Request
    */
   request?: Request
@@ -79,6 +86,7 @@ class Connection {
     handlers: Handlers,
     options?: Options
   ) {
+    this.obfs = none()(this)
     this.handlers = handlers
     this.socket = socket
     this.event = event
@@ -87,7 +95,7 @@ class Connection {
     }
     socket.on('data', (data) => {
       try {
-        this.readable = new Readable(data)
+        this.readable = new Readable(this.obfs.deObfuscate(data))
         this.parse()
         this.reply()
       } catch (err) {
@@ -111,7 +119,7 @@ class Connection {
    * @returns void
    */
   public write(writable: Writable): void {
-    this.socket.write(writable.toBuffer())
+    this.socket.write(this.obfs.obfuscate(writable.toBuffer()))
   }
 
   /**

@@ -9,6 +9,7 @@ import {
 import Writable from './writable'
 import { HandlerResolve } from './handler'
 import * as net from 'net'
+import Obfs from '../obfs/obfs'
 
 class Replay {
   /**
@@ -95,11 +96,13 @@ class Replay {
   /**
    * Resolves the promise with the Relay object information
    * @param socket - Clients socket
-   * @param resolve - returns information and socket to the client
-   * @param reject - returns errors to the client
+   * @param obfs - Obfuscator Object
+   * @param resolve - Returns information and socket to the client
+   * @param reject - Returns errors to the client
    */
   promiseHandler(
     socket: net.Socket,
+    obfs: Obfs,
     resolve: (value: PromiseLike<HandlerResolve> | HandlerResolve) => void,
     reject: (reason?: any) => void
   ) {
@@ -121,6 +124,7 @@ class Replay {
       resolve({
         address: this.addr,
         socket: socket,
+        obfs,
         rsv: this.rsv,
       })
     }

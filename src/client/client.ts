@@ -8,11 +8,13 @@ import {
   Handler,
   HandlerResolve,
 } from '../helper/handler'
-import Authenticator from './auth/authenticator'
 import Address from '../helper/address'
 import { AuthMethod } from '../helper/authMethod'
 import { COMMANDS } from '../helper/constants'
 import Request from '../helper/request'
+import { ObfsBuilder } from '../obfs/obfs'
+import { none } from '../obfs'
+import Authenticator from './auth/authenticator'
 
 /**
  *  The Client class is responsible for creating a TCP socket connection,
@@ -49,7 +51,15 @@ export class Client {
    */
   private readonly userId?: string
 
-  constructor(port: number, host: string, version: 4 | 5, userId?: string) {
+  public obfs: ObfsBuilder
+
+  constructor(
+    port: number,
+    host: string,
+    version: 4 | 5,
+    obfs: ObfsBuilder,
+    userId?: string
+  ) {
     this.host = host
     this.port = port
     this.userId = userId
@@ -59,6 +69,7 @@ export class Client {
       associate: handlers.associate,
       bind: handlers.bind,
     })
+    this.obfs = obfs
     this.event = new Event<EventTypes>()
   }
 
@@ -99,7 +110,7 @@ export class Client {
     connection.request = new Request(ver, cmd, address, 0, id)
     connection.resolve = resolve
     connection.reject = reject
-
+    connection.obfs = this.obfs(connection)
     connection.event.subscribeOnce('error', (err) => {
       reject(err.message)
     })
@@ -124,15 +135,20 @@ export class Client {
         version,
         userId
       )
-      if (connection?.request?.ver === 5) {
-        const authenticator = new Authenticator(connection)
-        authenticator.authenticate()
-      } else if (connection?.request?.ver === 4) {
-        if (connection?.request?.addr?.type === 'domain') {
-          reject('The Address type is not supported')
-        }
-        connection.handlers.req.bind(connection)
-      }
+      connection.socket.once('connect', () => {
+        connection.obfs.handshake(() => {
+          if (connection?.request?.ver === 5) {
+            const authenticator = new Authenticator(connection)
+            authenticator.authenticate()
+          }
+          if (connection?.request?.ver === 4) {
+            if (connection?.request?.addr?.type === 'domain') {
+              reject('The Address type is not supported')
+            }
+            connection.handlers.req.bind(connection)
+          }
+        })
+      })
     })
   }
 
@@ -154,8 +170,14 @@ export class Client {
           reject,
           5
         )
-        const authenticator = new Authenticator(connection)
-        authenticator.authenticate()
+        connection.socket.once('connect', () => {
+          connection.obfs.handshake(() => {
+            if (connection?.request?.ver === 5) {
+              const authenticator = new Authenticator(connection)
+              authenticator.authenticate()
+            }
+          })
+        })
       } else {
         reject("SOCKS V4  doesn't support associate command")
       }
@@ -181,15 +203,20 @@ export class Client {
         version,
         userId
       )
-      if (connection?.request?.ver === 5) {
-        const authenticator = new Authenticator(connection)
-        authenticator.authenticate()
-      } else if (connection?.request?.ver === 4) {
-        if (connection?.request?.addr?.type === 'domain') {
-          reject('The Address type is not supported')
-        }
-        connection.handlers.req.connect(connection)
-      }
+      connection.socket.once('connect', () => {
+        connection.obfs.handshake(() => {
+          if (connection?.request?.ver === 5) {
+            const authenticator = new Authenticator(connection)
+            authenticator.authenticate()
+          }
+          if (connection?.request?.ver === 4) {
+            if (connection?.request?.addr?.type === 'domain') {
+              reject('The Address type is not supported')
+            }
+            connection.handlers.req.connect(connection)
+          }
+        })
+      })
     })
   }
 
@@ -213,6 +240,16 @@ export class Client {
     this.handlers.req[cmd] = reqHandler(handler)
     return this
   }
+
+  /**
+   * Get the handler function, and update this.handlers.obfs
+   * @param handler - Emitted when new request appears
+   * @returns Server
+   */
+  public useObfs(handler: ObfsBuilder): Client {
+    this.obfs = handler
+    return this
+  }
 }
 
 /**
@@ -220,6 +257,7 @@ export class Client {
  * @param port - Server port
  * @param host - Server address
  * @param version - Server protocol version
+ * @param obfs - Obfuscation Method
  * @param userId - userId for identification in v4
  * @returns void
  */
@@ -229,5 +267,5 @@ export const connect = (
   version: 4 | 5,
   userId?: string
 ) => {
-  return new Client(port, host, version, userId)
+  return new Client(port, host, version, none(), userId)
 }

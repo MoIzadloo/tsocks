@@ -2,6 +2,7 @@
 
 - [ ] Complete documentation
 - [ ] Complete test coverage
+- [ ] Add encryption and compression to the http obfuscation method
 
 ### In Progress
 
@@ -16,3 +17,4 @@
 - [x] Implementation of client Associate
 - [x] Implementation of server Bind
 - [x] Implementation of client Bind
+- [x] Add obfuscation support
