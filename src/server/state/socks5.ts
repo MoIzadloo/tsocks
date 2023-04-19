@@ -7,6 +7,9 @@ import { http, none } from '../../obfs'
 import Readable from '../../helper/readable'
 import ObfsMethod from '../../obfs/obfs'
 
+/**
+ * The ObfsState class identifies the obfuscation method
+ */
 export class ObfsState extends State {
   private obfsMethods = [none(), http()]
 
@@ -25,12 +28,14 @@ export class ObfsState extends State {
   }
 
   reply(): void {
-    this.context.readable = new Readable(
-      this.context.obfs.deObfuscate(this.context.read())
-    )
-    this.context.transitionTo(new IdentifierState(this.context))
-    this.context.parse()
-    this.context.reply()
+    if (this.context.obfs.type === ObfsMethod.SERVER) {
+      this.context.readable = new Readable(
+        this.context.obfs.deObfuscate(this.context.read())
+      )
+      this.context.transitionTo(new IdentifierState(this.context))
+      this.context.parse()
+      this.context.reply()
+    }
   }
 }
 

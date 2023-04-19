@@ -6,6 +6,10 @@ import {
   compressionMethods,
 } from '../helper/constants'
 
+/**
+ * The Http class is an obfuscation method based on the
+ * HTTP protocol
+ */
 class Http extends ObfsMethod {
   public path
   public name = 'HTTP'
@@ -27,10 +31,11 @@ class Http extends ObfsMethod {
     this.method = method
   }
 
-  handshake(callback: () => void): void {
-    callback()
-  }
-
+  /**
+   * Checks if the message format is Appropriate with
+   * this obfuscation method
+   * @param message - The incoming message
+   */
   check(message: Buffer) {
     const regex = new RegExp(
       `^(?<method>GET|POST|PUT|DELETE|HEAD|OPTIONS).\\/(?<path>[^HTTP]*) HTTP\\/(?<version>.*)`
@@ -44,6 +49,18 @@ class Http extends ObfsMethod {
     return false
   }
 
+  /**
+   * Begins the handshake process for the encryption
+   * @param callback - Emitted after the handshake process
+   */
+  handshake(callback: () => void): void {
+    callback()
+  }
+
+  /**
+   * DeObfuscates the obfuscated message
+   * @param message - The obfuscated message
+   */
   deObfuscate(message: Buffer): Buffer {
     const http = message.toString()
     const bodyIndex = http.indexOf('\r\n\r\n')
@@ -62,6 +79,10 @@ class Http extends ObfsMethod {
     return body
   }
 
+  /**
+   * Obfuscates the non-obfuscated message
+   * @param message - The non-obfuscated message
+   */
   obfuscate(message: Buffer): Buffer {
     let http = ''
     if (this.type === ObfsMethod.SERVER) {
@@ -82,12 +103,19 @@ class Http extends ObfsMethod {
   }
 }
 
+/**
+ * builds a Http obfuscation method object
+ * @param path - Endpoint path
+ * @param compression - Compression method
+ * @param encryption - Encryption algorithm
+ * @param method - HTTP method
+ */
 export const http =
   (
     path = '',
+    method = obfsHttpMethods.post,
     compression = compressionMethods.none,
-    encryption = encryptionMethods.none,
-    method = obfsHttpMethods.post
+    encryption = encryptionMethods.none
   ) =>
   (
     connection: Connection,

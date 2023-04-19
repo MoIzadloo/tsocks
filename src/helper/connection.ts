@@ -70,6 +70,9 @@ class Connection {
     socks4: true,
   }
 
+  /**
+   * The obfuscation method
+   */
   public obfs: ObfsMethod
 
   /**

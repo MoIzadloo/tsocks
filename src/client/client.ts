@@ -241,8 +241,13 @@ export class Client {
     return this
   }
 
-  public useObfs(method: ObfsBuilder): Client {
-    this.obfs = method
+  /**
+   * Get the handler function, and update this.handlers.obfs
+   * @param handler - Emitted when new request appears
+   * @returns Server
+   */
+  public useObfs(handler: ObfsBuilder): Client {
+    this.obfs = handler
     return this
   }
 }

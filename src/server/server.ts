@@ -105,8 +105,13 @@ export class Server {
     return this
   }
 
-  public useObfs(method: ObfsBuilder): Server {
-    this.handlers.obfs.push(method)
+  /**
+   * Get the handler function, and update this.handlers.userId
+   * @param handler - Emitted when new request appears
+   * @returns Server
+   */
+  public useObfs(handler: ObfsBuilder): Server {
+    this.handlers.obfs.push(handler)
     return this
   }
 

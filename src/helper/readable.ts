@@ -13,6 +13,12 @@ class Readable {
     this.data = data
   }
 
+  /**
+   * Read n bytes of data without modifying the data property,
+   * reads all the data if no argument is passed
+   * @param bytes - Number of bytes to be read from data
+   * @returns Buffer
+   */
   public cat(bytes?: number) {
     let slice
     if (bytes) {

@@ -2,7 +2,7 @@
 
 # TSocks
 
-TSocks is an implementation of SOCKS protocol.
+TSocks is an implementation of the SOCKS protocol.
 It's designed to be very flexible and adhesive
 
 - **Modular** to be suited to your needs
@@ -13,8 +13,8 @@ It's designed to be very flexible and adhesive
 # Pros
 
 1. TSocks is powered with hooks and events which give you
-   the ability to implement different parts of protocol yourself
-2. We used an API similar to the [net](https://nodejs.org/api/net.html) module which you are propably familiar with
+   the ability to implement different parts of the protocol yourself
+2. We used an API similar to the [net](https://nodejs.org/api/net.html) module which you are probably familiar with
 3. You have access to incoming connections socket through available hooks
 
 ## Install
@@ -176,7 +176,7 @@ server.useReq('associate', (info, socket) => {
   const port = info.address.port // Port number
   const type = info.address.type // ipv4 | ipv6 | domain
   const version = info.version // SOCKS version
-  // You can implement the rest how ever you want
+  // You can implement the rest however you want
   // Just remember the response should be decided by version
 })
 
@@ -248,9 +248,31 @@ server.useReq('connect', (info, socket) => {
   const port = info.address.port // Port number
   const type = info.address.type // ipv4 | ipv6 | domain
   const version = info.version // SOCKS version
-  // You can implement the rest how ever you want
+  // You can implement the rest however you want
   // Just remember the response should be decided by version
 })
+
+server.listen(port, host)
+```
+
+### SOCKS server obfuscation
+
+You can implement your obfuscation methods by extending your obfuscation class from the [ObfsMethod'](src/obfs/obfs.ts) class
+and creating a builder function for your class [ObfsBuilder'](src/obfs/obfs.ts) or use the available obfuscation methods
+by, passing their builder function to the useObfs hook as below:
+
+```typescript
+import { createServer, obfsMethods } from 'tsocks'
+
+const host = '127.0.0.1'
+const port = 1080
+
+const server = createServer({
+  socks4: true,
+  socks5: true,
+})
+
+server.useObfs(obfsMethods.http())
 
 server.listen(port, host)
 ```
@@ -523,6 +545,47 @@ try {
         remote.write(Buffer.from('Hello'))
         state++
     }
+  })
+} catch (err) {
+  console.log(err)
+}
+```
+
+### SOCKS client obfuscation
+
+You can implement your obfuscation methods by extending your obfuscation class from the [ObfsMethod'](src/obfs/obfs.ts) class
+and creating a builder function for your class [ObfsBuilder'](src/obfs/obfs.ts) or use the available obfuscation methods
+by, passing their builder function to the useObfs hook as below:
+
+```typescript
+import { connect, obfsMethods } from 'tsocks'
+
+const host = '127.0.0.1'
+const port = 1080
+const httpPort = 80
+
+try {
+  const info = await connect(port, host, 5)
+    .useObfs(obfsMethods.http())
+    .connect(httpPort, 'google.com')
+
+  // remember to use the obfuscate method before sending your data to the
+  // SOCKS server and deObfuscate methods when you receive any data from the
+  // SOCKS server when you are using an obfuscation method
+  info.socket.write(
+    info.obfs.obfuscate(
+      Buffer.from(
+        'GET / HTTP/1.1\r\n' +
+          'Host: www.google.com:80\r\n' +
+          'Connection: close\r\n' +
+          '\r\n'
+      )
+    )
+  )
+
+  info.socket.on('data', (data) => {
+    console.log(info.obfs.deObfuscate(data).toString())
+    info.socket.end()
   })
 } catch (err) {
   console.log(err)
