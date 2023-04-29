@@ -1,3 +1,8 @@
+# [v3.4.0](https://github.com/MoIzadloo/tsocks/compare/v3.3.0...v3.4.0) (2023-04-29)
+
+## ✨ New Features
+- [`42c5a76`](https://github.com/MoIzadloo/tsocks/commit/42c5a76)  feat: Add obfuscation support
+
 # [v3.3.0](https://github.com/MoIzadloo/tsocks/compare/v3.2.3...v3.3.0) (2023-04-19)
 
 ## ✨ New Features
