@@ -257,8 +257,8 @@ server.listen(port, host)
 
 ### SOCKS server obfuscation
 
-You can implement your obfuscation methods by extending your obfuscation class from the [ObfsMethod'](src/obfs/obfs.ts) class
-and creating a builder function for your class [ObfsBuilder'](src/obfs/obfs.ts) or use the available obfuscation methods
+You can implement your obfuscation methods by extending your obfuscation class from the [ObfsMethod](src/obfs/obfs.ts) class
+and creating a builder function for your class [ObfsBuilder](src/obfs/obfs.ts) or use the available obfuscation methods
 by, passing their builder function to the useObfs hook as below:
 
 ```typescript
@@ -553,8 +553,8 @@ try {
 
 ### SOCKS client obfuscation
 
-You can implement your obfuscation methods by extending your obfuscation class from the [ObfsMethod'](src/obfs/obfs.ts) class
-and creating a builder function for your class [ObfsBuilder'](src/obfs/obfs.ts) or use the available obfuscation methods
+You can implement your obfuscation methods by extending your obfuscation class from the [ObfsMethod](src/obfs/obfs.ts) class
+and creating a builder function for your class [ObfsBuilder](src/obfs/obfs.ts) or use the available obfuscation methods
 by, passing their builder function to the useObfs hook as below:
 
 ```typescript
