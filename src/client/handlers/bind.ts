@@ -16,6 +16,7 @@ export const bind = handler((info, socket, obfs, event, resolve, reject) => {
     info.userId
   )
   socket.write(obfs.obfuscate(request.toBuffer()))
+  socket.removeAllListeners('data')
   socket.on('data', (data) => {
     const reply = Reply.from(obfs.deObfuscate(data))
     if (resolve && reject && obfs) {

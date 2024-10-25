@@ -1,11 +1,18 @@
 import ObfsMethod from './obfs'
 import Connection from '../helper/connection'
+import Readable from '../helper/readable'
+import { IdentifierState } from '../server/state/socks5'
 
 /**
  * The none is the simplest available obfuscation method
  */
 class None extends ObfsMethod {
-  name = 'None'
+  public name = 'None'
+  public handshakeFlag: boolean
+  constructor(connection: Connection) {
+    super(connection)
+    this.handshakeFlag = false
+  }
 
   /**
    * Checks if the message format is Appropriate with
@@ -20,8 +27,21 @@ class None extends ObfsMethod {
    * Begins the handshake process for the encryption
    * @param callback - Emitted after the handshake process
    */
-  handshake(callback: () => void): void {
-    callback()
+  handshake(callback?: () => void): void {
+    if (this.connection.type === Connection.CLIENT) {
+      this.handshakeFlag = true
+      if (callback) {
+        callback()
+      }
+    } else {
+      this.handshakeFlag = true
+      this.connection.readable = new Readable(
+        this.deObfuscate(this.connection.read())
+      )
+      this.connection.transitionTo(new IdentifierState(this.connection))
+      this.connection.parse()
+      this.connection.reply()
+    }
   }
 
   /**
@@ -44,13 +64,6 @@ class None extends ObfsMethod {
 /**
  * builds a None obfuscation method object
  */
-export const none =
-  () =>
-  (
-    connection: Connection,
-    type:
-      | typeof ObfsMethod.CLIENT
-      | typeof ObfsMethod.SERVER = ObfsMethod.CLIENT
-  ) => {
-    return new None(connection, type)
-  }
+export const none = () => (connection: Connection) => {
+  return new None(connection)
+}

@@ -266,9 +266,61 @@ describe('client useObfs', () => {
       })
   })
 
-  test('useObfs HTTP with no cipher bind', (done) => {
+  test('useObfs HTTP with websocket connect', (done) => {
     connect(serverPort, serverHost, 5)
-      .useObfs(obfsMethods.http())
+      .useObfs(obfsMethods.websocket())
+      .connect(httpPort, '142.251.1.101')
+      .then((info) => {
+        info.socket.write(
+          info.obfs.obfuscate(
+            Buffer.from(
+              'GET / HTTP/1.1\r\n' +
+                'Host: www.google.com:80\r\n' +
+                'Connection: close\r\n' +
+                '\r\n'
+            )
+          )
+        )
+        info.socket.once('data', (data) => {
+          info.socket.destroy()
+          expect(info.obfs.deObfuscate(data).toString()).toMatch(/20[01] OK/)
+          done()
+        })
+      })
+      .catch((reason) => {
+        expect(true).toBe(false)
+      })
+  })
+
+  test('useObfs HTTP with websocket connect', (done) => {
+    connect(serverPort, serverHost, 4)
+      .useObfs(obfsMethods.websocket())
+      .connect(httpPort, '142.251.1.101')
+      .then((info) => {
+        info.socket.write(
+          info.obfs.obfuscate(
+            Buffer.from(
+              'GET / HTTP/1.1\r\n' +
+                'Host: www.google.com:80\r\n' +
+                'Connection: close\r\n' +
+                '\r\n'
+            )
+          )
+        )
+        info.socket.once('data', (data) => {
+          info.socket.destroy()
+          expect(info.obfs.deObfuscate(data).toString()).toMatch(/20[01] OK/)
+          done()
+        })
+      })
+      .catch((reason) => {
+        expect(true).toBe(false)
+      })
+  })
+
+  test('useObfs HTTP with no cipher bind', (done) => {
+    connect(serverPort, serverHost, 4)
+      .useObfs(obfsMethods.websocket())
       .bind(0, '0.0.0.0')
       .then((info) => {
         const remote = net.connect(info.address.port, info.address.host)

@@ -11,6 +11,7 @@ export const associate = handler(
   (info, socket, obfs, event, resolve, reject) => {
     const request = new Request(info.version, COMMANDS.associate, info.address)
     socket.write(request.toBuffer())
+    socket.removeAllListeners('data')
     socket.on('data', (data) => {
       const reply = Reply.from(data)
       if (resolve && reject && obfs) {

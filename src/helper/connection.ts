@@ -27,6 +27,10 @@ export type Options = {
  * a new instance get constructed pre each connection
  */
 class Connection {
+  public static readonly CLIENT = 'CLIENT'
+
+  public static readonly SERVER = 'SERVER'
+  public type: 'CLIENT' | 'SERVER'
   /**
    * Resolve function for client only
    */
@@ -84,12 +88,14 @@ class Connection {
     event: Event<EventTypes>,
     socket: net.Socket,
     handlers: Handlers,
+    type: 'CLIENT' | 'SERVER',
     options?: Options
   ) {
     this.obfs = none()(this)
     this.handlers = handlers
     this.socket = socket
     this.event = event
+    this.type = type
     if (options) {
       this.options = options
     }

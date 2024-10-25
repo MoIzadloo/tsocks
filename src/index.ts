@@ -8,6 +8,7 @@ import Address from './helper/address'
 import Request from './helper/request'
 import Reply from './helper/reply'
 import * as obfsMethods from './obfs/index'
+import { State } from './helper/state'
 
 const parseUdpFrame = UdpRelay.parseUdpFrame
 const createUdpFrame = UdpRelay.createUdpFrame
@@ -24,4 +25,5 @@ export {
   EventTypes,
   Request,
   Reply,
+  State,
 }

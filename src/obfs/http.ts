@@ -5,6 +5,8 @@ import {
   obfsHttpMethods,
   compressionMethods,
 } from '../helper/constants'
+import Readable from '../helper/readable'
+import { IdentifierState } from '../server/state/socks5'
 
 /**
  * The Http class is an obfuscation method based on the
@@ -16,19 +18,20 @@ class Http extends ObfsMethod {
   public encryption: string
   public compression: string
   public method: string
+  public handshakeFlag: boolean
   constructor(
     connection: Connection,
-    type: typeof ObfsMethod.CLIENT | typeof ObfsMethod.SERVER,
     path: string,
     compression: string,
     encryption: string,
     method: string
   ) {
-    super(connection, type)
+    super(connection)
     this.path = path
     this.compression = compression
     this.encryption = encryption
     this.method = method
+    this.handshakeFlag = false
   }
 
   /**
@@ -53,8 +56,21 @@ class Http extends ObfsMethod {
    * Begins the handshake process for the encryption
    * @param callback - Emitted after the handshake process
    */
-  handshake(callback: () => void): void {
-    callback()
+  handshake(callback?: () => void): void {
+    if (this.connection.type === Connection.CLIENT) {
+      this.handshakeFlag = true
+      if (callback) {
+        callback()
+      }
+    } else {
+      this.handshakeFlag = true
+      this.connection.readable = new Readable(
+        this.deObfuscate(this.connection.read())
+      )
+      this.connection.transitionTo(new IdentifierState(this.connection))
+      this.connection.parse()
+      this.connection.reply()
+    }
   }
 
   /**
@@ -85,7 +101,7 @@ class Http extends ObfsMethod {
    */
   obfuscate(message: Buffer): Buffer {
     let http = ''
-    if (this.type === ObfsMethod.SERVER) {
+    if (this.connection.type === Connection.SERVER) {
       http += `HTTP/1.1 200 OK\r\n`
       http += `Connection: keep-alive\r\n`
       http += `Content-Type: text/html; charset=utf-8\r\n`
@@ -117,11 +133,6 @@ export const http =
     compression = compressionMethods.none,
     encryption = encryptionMethods.none
   ) =>
-  (
-    connection: Connection,
-    type:
-      | typeof ObfsMethod.CLIENT
-      | typeof ObfsMethod.SERVER = ObfsMethod.CLIENT
-  ) => {
-    return new Http(connection, type, path, compression, encryption, method)
+  (connection: Connection) => {
+    return new Http(connection, path, compression, encryption, method)
   }

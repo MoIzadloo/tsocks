@@ -93,7 +93,12 @@ export class Client {
     userId?: string
   ) {
     const socket = net.connect(this.port, this.host)
-    const connection = new Connection(this.event, socket, this.handlers)
+    const connection = new Connection(
+      this.event,
+      socket,
+      this.handlers,
+      'CLIENT'
+    )
     let ver
     if (version) {
       ver = version

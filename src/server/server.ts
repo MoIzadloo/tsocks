@@ -51,6 +51,7 @@ export class Server {
         this.event,
         socket,
         this.handlers,
+        'SERVER',
         options
       )
       this.connections.push(connection)

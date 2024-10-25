@@ -6,15 +6,6 @@ import Connection from '../helper/connection'
  * every obfuscation method should extend this class
  */
 abstract class ObfsMethod {
-  public static readonly CLIENT = 'CLIENT'
-
-  public static readonly SERVER = 'SERVER'
-
-  /**
-   * The type of obfuscation
-   */
-  public type: typeof ObfsMethod.CLIENT | typeof ObfsMethod.SERVER
-
   /**
    * Connection object
    */
@@ -25,12 +16,10 @@ abstract class ObfsMethod {
    */
   public abstract name: string
 
-  constructor(
-    connection: Connection,
-    type: typeof ObfsMethod.CLIENT | typeof ObfsMethod.SERVER
-  ) {
+  public abstract handshakeFlag: boolean
+
+  constructor(connection: Connection) {
     this.connection = connection
-    this.type = type
   }
 
   /**
@@ -44,7 +33,7 @@ abstract class ObfsMethod {
    * Begins the handshake process for the encryption
    * @param callback - Emitted after the handshake process
    */
-  public abstract handshake(callback: () => void): void
+  public abstract handshake(callback?: () => void): void
 
   /**
    * DeObfuscates the obfuscated message
@@ -59,9 +48,6 @@ abstract class ObfsMethod {
   public abstract obfuscate(message: Buffer): Buffer
 }
 
-export type ObfsBuilder = (
-  connection: Connection,
-  type?: typeof ObfsMethod.CLIENT | typeof ObfsMethod.SERVER
-) => ObfsMethod
+export type ObfsBuilder = (connection: Connection) => ObfsMethod
 
 export default ObfsMethod

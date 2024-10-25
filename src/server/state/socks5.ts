@@ -3,15 +3,13 @@ import Request from '../../helper/request'
 import * as socks4 from './socks4'
 import { State } from '../../helper/state'
 import Authenticator from '../auth/authenticator'
-import { http, none } from '../../obfs'
-import Readable from '../../helper/readable'
-import ObfsMethod from '../../obfs/obfs'
+import { http, none, websocket } from '../../obfs'
 
 /**
  * The ObfsState class identifies the obfuscation method
  */
 export class ObfsState extends State {
-  private obfsMethods = [none(), http()]
+  private obfsMethods = [websocket(), none(), http()]
 
   parse(): void {
     if (this.context.handlers.obfs.length > 0) {
@@ -19,7 +17,7 @@ export class ObfsState extends State {
     }
     const message = this.context.cat()
     for (const m of this.obfsMethods) {
-      const method = m(this.context, ObfsMethod.SERVER)
+      const method = m(this.context)
       if (method.check(message)) {
         this.context.obfs = method
         break
@@ -28,14 +26,7 @@ export class ObfsState extends State {
   }
 
   reply(): void {
-    if (this.context.obfs.type === ObfsMethod.SERVER) {
-      this.context.readable = new Readable(
-        this.context.obfs.deObfuscate(this.context.read())
-      )
-      this.context.transitionTo(new IdentifierState(this.context))
-      this.context.parse()
-      this.context.reply()
-    }
+    this.context.obfs.handshake()
   }
 }
 
@@ -54,6 +45,7 @@ export class IdentifierState extends State {
    * @returns void
    */
   parse(): void {
+    // console.log(this.context.cat())
     this.firstByte = this.context.cat(1)
   }
 
