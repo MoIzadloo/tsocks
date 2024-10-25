@@ -66,14 +66,14 @@ class HandShake extends State {
  */
 class WebSocket extends ObfsMethod {
   public path: string
-  public name: string = 'WebSocket'
+  public name = 'WebSocket'
   public encryption: string
   public compression: string
   public handshakeFlag: boolean
 
   constructor(
     connection: Connection,
-    path: string = '/',
+    path = '/',
     compression: string = compressionMethods.none,
     encryption: string = encryptionMethods.none
   ) {
@@ -162,7 +162,7 @@ class WebSocket extends ObfsMethod {
  */
 export const websocket =
   (
-    path: string = '/',
+    path = '/',
     compression: string = compressionMethods.none,
     encryption: string = encryptionMethods.none
   ) =>
