@@ -1,3 +1,12 @@
+# [v3.5.0](https://github.com/MoIzadloo/tsocks/compare/v3.4.0...v3.5.0) (2024-10-25)
+
+## ✨ New Features
+- [`6166ae9`](https://github.com/MoIzadloo/tsocks/commit/6166ae9)  feat: new obfs method 
+
+## 🐛 Bug Fixes
+- [`15264f9`](https://github.com/MoIzadloo/tsocks/commit/15264f9)  fix: husky and build 
+- [`29e34c8`](https://github.com/MoIzadloo/tsocks/commit/29e34c8)  fix: husky and build
+
 # [v3.4.0](https://github.com/MoIzadloo/tsocks/compare/v3.3.0...v3.4.0) (2023-04-29)
 
 ## ✨ New Features
