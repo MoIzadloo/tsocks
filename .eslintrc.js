@@ -8,6 +8,7 @@ module.exports = {
     '@typescript-eslint/naming-convention': 'warn',
     'prettier/prettier': 'error',
     'tsdoc/syntax': 'warn',
+    "@typescript-eslint/no-inferrable-types": "warn",
   },
   overrides: [
     {
