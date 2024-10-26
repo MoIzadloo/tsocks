@@ -98,8 +98,8 @@ class WebSocket extends ObfsMethod {
   }
 
   private generateWebSocketKey(): string {
-    const randomBytes = crypto.randomBytes(16);
-    return randomBytes.toString('base64');
+    const randomBytes = crypto.randomBytes(16)
+    return randomBytes.toString('base64')
   }
 
   /**
@@ -109,10 +109,14 @@ class WebSocket extends ObfsMethod {
    */
   handshake(callback?: () => void): void {
     if (this.connection.type === Connection.CLIENT) {
-      const secWebSocketKey = this.generateWebSocketKey(); // Generate a unique key for the handshake
+      const secWebSocketKey = this.generateWebSocketKey() // Generate a unique key for the handshake
       const handshakeRequest =
         `GET ${this.path} HTTP/1.1\r\n` +
-        `Host: ${this.hostName ? this.hostName : `${this.connection.socket.remoteAddress}:${this.connection.socket.remotePort}`}\r\n` +
+        `Host: ${
+          this.hostName
+            ? this.hostName
+            : `${this.connection.socket.remoteAddress}:${this.connection.socket.remotePort}`
+        }\r\n` +
         'Upgrade: websocket\r\n' +
         'Connection: Upgrade\r\n' +
         `Sec-WebSocket-Key: ${secWebSocketKey}\r\n` +

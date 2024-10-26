@@ -3,7 +3,7 @@ import Request from '../../helper/request'
 import * as socks4 from './socks4'
 import { State } from '../../helper/state'
 import Authenticator from '../auth/authenticator'
-import {  none, websocket } from '../../obfs'
+import { none, websocket } from '../../obfs'
 
 /**
  * The ObfsState class identifies the obfuscation method

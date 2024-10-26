@@ -61,7 +61,7 @@ export class Client {
     version: 4 | 5,
     obfs: ObfsBuilder,
     userId?: string,
-    tls?: boolean,
+    tls?: boolean
   ) {
     this.host = host
     this.port = port
@@ -96,8 +96,8 @@ export class Client {
     version?: 4 | 5,
     userId?: string
   ) {
-    let socket;
-    if (this.tls){
+    let socket
+    if (this.tls) {
       socket = tls.connect(this.port, this.host, { rejectUnauthorized: false })
     } else {
       socket = net.connect(this.port, this.host)
@@ -280,7 +280,7 @@ export const connect = (
   host: string,
   version: 4 | 5,
   userId?: string,
-  tls?: boolean,
+  tls?: boolean
 ) => {
   return new Client(port, host, version, none(), userId, tls)
 }
