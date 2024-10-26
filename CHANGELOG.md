@@ -1,3 +1,8 @@
+# [v3.5.3](https://github.com/MoIzadloo/tsocks/compare/v3.5.2...v3.5.3) (2024-10-26)
+
+## 🐛 Bug Fixes
+- [`ce195a2`](https://github.com/MoIzadloo/tsocks/commit/ce195a2)  fix: test obfs
+
 # [v3.5.2](https://github.com/MoIzadloo/tsocks/compare/v3.5.1...v3.5.2) (2024-10-26)
 
 ## 🐛 Bug Fixes
