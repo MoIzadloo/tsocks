@@ -1,4 +1,5 @@
 import net from 'net'
+import tls from 'tls'
 import Event from '../helper/event'
 import Connection, { EventTypes } from '../helper/connection'
 import * as handlers from './handlers/index'
@@ -50,6 +51,7 @@ export class Client {
    * userId for identification in v4
    */
   private readonly userId?: string
+  private readonly tls?: boolean
 
   public obfs: ObfsBuilder
 
@@ -58,12 +60,14 @@ export class Client {
     host: string,
     version: 4 | 5,
     obfs: ObfsBuilder,
-    userId?: string
+    userId?: string,
+    tls?: boolean,
   ) {
     this.host = host
     this.port = port
     this.userId = userId
     this.version = version
+    this.tls = tls
     this.handlers = new Handlers({
       connect: handlers.connect,
       associate: handlers.associate,
@@ -92,7 +96,12 @@ export class Client {
     version?: 4 | 5,
     userId?: string
   ) {
-    const socket = net.connect(this.port, this.host)
+    let socket;
+    if (this.tls){
+      socket = tls.connect(this.port, this.host, { rejectUnauthorized: false })
+    } else {
+      socket = net.connect(this.port, this.host)
+    }
     const connection = new Connection(
       this.event,
       socket,
@@ -270,7 +279,8 @@ export const connect = (
   port: number,
   host: string,
   version: 4 | 5,
-  userId?: string
+  userId?: string,
+  tls?: boolean,
 ) => {
-  return new Client(port, host, version, none(), userId)
+  return new Client(port, host, version, none(), userId, tls)
 }

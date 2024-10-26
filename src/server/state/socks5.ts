@@ -3,13 +3,13 @@ import Request from '../../helper/request'
 import * as socks4 from './socks4'
 import { State } from '../../helper/state'
 import Authenticator from '../auth/authenticator'
-import { http, none, websocket } from '../../obfs'
+import {  none, websocket } from '../../obfs'
 
 /**
  * The ObfsState class identifies the obfuscation method
  */
 export class ObfsState extends State {
-  private obfsMethods = [websocket(), none(), http()]
+  private obfsMethods = [websocket(), none()]
 
   parse(): void {
     if (this.context.handlers.obfs.length > 0) {

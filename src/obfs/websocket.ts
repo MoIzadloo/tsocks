@@ -70,10 +70,12 @@ class WebSocket extends ObfsMethod {
   public encryption: string
   public compression: string
   public handshakeFlag: boolean
+  public hostName: string | undefined
 
   constructor(
     connection: Connection,
     path = '/',
+    hostName: string | undefined,
     compression: string = compressionMethods.none,
     encryption: string = encryptionMethods.none
   ) {
@@ -82,6 +84,7 @@ class WebSocket extends ObfsMethod {
     this.handshakeFlag = false
     this.compression = compression
     this.encryption = encryption
+    this.hostName = hostName
   }
 
   /**
@@ -94,6 +97,11 @@ class WebSocket extends ObfsMethod {
     return messageStr.includes('Upgrade: websocket')
   }
 
+  private generateWebSocketKey(): string {
+    const randomBytes = crypto.randomBytes(16);
+    return randomBytes.toString('base64');
+  }
+
   /**
    * Initiates the WebSocket handshake for the CLIENT.
    * For SERVER type, waits for client handshake and responds accordingly.
@@ -101,12 +109,13 @@ class WebSocket extends ObfsMethod {
    */
   handshake(callback?: () => void): void {
     if (this.connection.type === Connection.CLIENT) {
+      const secWebSocketKey = this.generateWebSocketKey(); // Generate a unique key for the handshake
       const handshakeRequest =
         `GET ${this.path} HTTP/1.1\r\n` +
-        `Host: ${this.connection.socket.remoteAddress}:${this.connection.socket.remotePort}\r\n` +
+        `Host: ${this.hostName ? this.hostName : `${this.connection.socket.remoteAddress}:${this.connection.socket.remotePort}`}\r\n` +
         'Upgrade: websocket\r\n' +
         'Connection: Upgrade\r\n' +
-        'Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==\r\n' +
+        `Sec-WebSocket-Key: ${secWebSocketKey}\r\n` +
         'Sec-WebSocket-Version: 13\r\n\r\n'
       if (callback) {
         this.connection.transitionTo(new HandShake(this.connection, callback))
@@ -163,9 +172,10 @@ class WebSocket extends ObfsMethod {
 export const websocket =
   (
     path = '/',
+    hostName: string | undefined = undefined,
     compression: string = compressionMethods.none,
     encryption: string = encryptionMethods.none
   ) =>
   (connection: Connection) => {
-    return new WebSocket(connection, path, compression, encryption)
+    return new WebSocket(connection, path, hostName, compression, encryption)
   }
