@@ -32,6 +32,7 @@ module.exports = {
       buffer: false,
       util: false,
       crypto: false,
+      tls: false,
     },
     extensions: ['.ts', '.js', '.tsx', '.jsx'],
   },
