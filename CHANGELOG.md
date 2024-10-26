@@ -1,3 +1,9 @@
+# [v3.5.2](https://github.com/MoIzadloo/tsocks/compare/v3.5.1...v3.5.2) (2024-10-26)
+
+## 🐛 Bug Fixes
+- [`80de1f5`](https://github.com/MoIzadloo/tsocks/commit/80de1f5)  fix: test obfs 
+- [`7a859cd`](https://github.com/MoIzadloo/tsocks/commit/7a859cd)  fix: test obfs
+
 # [v3.5.1](https://github.com/MoIzadloo/tsocks/compare/v3.5.0...v3.5.1) (2024-10-26)
 
 ## 🐛 Bug Fixes
