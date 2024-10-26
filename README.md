@@ -272,7 +272,7 @@ const server = createServer({
   socks5: true,
 })
 
-server.useObfs(obfsMethods.http())
+server.useObfs(obfsMethods.websocket())
 
 server.listen(port, host)
 ```
@@ -566,7 +566,7 @@ const httpPort = 80
 
 try {
   const info = await connect(port, host, 5)
-    .useObfs(obfsMethods.http())
+    .useObfs(obfsMethods.websocket())
     .connect(httpPort, 'google.com')
 
   // remember to use the obfuscate method before sending your data to the

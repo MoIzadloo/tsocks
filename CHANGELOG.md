@@ -1,8 +1,9 @@
 # [v3.5.1](https://github.com/MoIzadloo/tsocks/compare/v3.5.0...v3.5.1) (2024-10-26)
 
 ## 🐛 Bug Fixes
-- [`cc097be`](https://github.com/MoIzadloo/tsocks/commit/cc097be)  fix: obfs on remote 
-- [`653a42c`](https://github.com/MoIzadloo/tsocks/commit/653a42c)  fix: build
+
+- [`cc097be`](https://github.com/MoIzadloo/tsocks/commit/cc097be) fix: obfs on remote
+- [`653a42c`](https://github.com/MoIzadloo/tsocks/commit/653a42c) fix: build
 
 # [v3.5.0](https://github.com/MoIzadloo/tsocks/compare/v3.4.0...v3.5.0) (2024-10-25)
 
