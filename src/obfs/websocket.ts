@@ -140,12 +140,13 @@ class WebSocket extends ObfsMethod {
    * @returns The de-obfuscated message payload.
    */
   deObfuscate(message: Buffer): Buffer {
-    if (this.handshakeFlag === false) {
-      return message
-    } else {
-      const payloadOffset = 2 // Skipping the first 2 bytes of WebSocket framing
-      return message.slice(payloadOffset)
-    }
+    return message
+    // if (this.handshakeFlag === false) {
+    //   return message
+    // } else {
+    //   const payloadOffset = 2 // Skipping the first 2 bytes of WebSocket framing
+    //   return message.slice(payloadOffset)
+    // }
   }
 
   /**
@@ -154,16 +155,17 @@ class WebSocket extends ObfsMethod {
    * @returns The obfuscated WebSocket message.
    */
   obfuscate(message: Buffer): Buffer {
-    if (this.handshakeFlag === false) {
-      return message
-    } else {
-      const frame = Buffer.alloc(message.length + 2) // Basic WebSocket frame
-      frame[0] = 0x81 // Set FIN and TextFrame opcode
-      frame[1] = message.length // Payload length
+    return message
+    // if (this.handshakeFlag === false) {
+    //   return message
+    // } else {
+    //   const frame = Buffer.alloc(message.length + 2) // Basic WebSocket frame
+    //   frame[0] = 0x81 // Set FIN and TextFrame opcode
+    //   frame[1] = message.length // Payload length
 
-      message.copy(frame, 2) // Copy the message payload after the WebSocket header
-      return frame
-    }
+    //   message.copy(frame, 2) // Copy the message payload after the WebSocket header
+    //   return frame
+    // }
   }
 }
 
