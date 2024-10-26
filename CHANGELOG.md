@@ -1,3 +1,8 @@
+# [v3.5.4](https://github.com/MoIzadloo/tsocks/compare/v3.5.3...v3.5.4) (2024-10-26)
+
+## 🐛 Bug Fixes
+- [`d9280e8`](https://github.com/MoIzadloo/tsocks/commit/d9280e8)  fix: test obfs
+
 # [v3.5.3](https://github.com/MoIzadloo/tsocks/compare/v3.5.2...v3.5.3) (2024-10-26)
 
 ## 🐛 Bug Fixes
